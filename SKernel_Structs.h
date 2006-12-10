@@ -79,7 +79,7 @@ enum ITEM_TYPE
 	T_SAT,          /*!< Solar Satellite */
 	T_ZER,          /*!< Destroyer */
 	T_TS,           /*!< Death Star */
-    
+
     // defense
 	T_RAK,          /*!< Missile Launcher */
 	T_LL,           /*!< Small Laser */
@@ -89,9 +89,9 @@ enum ITEM_TYPE
 	T_PLASMA,       /*!< Plasma Cannon */
 	T_KS,           /*!< Small Shield Dome */
 	T_GS,           /*!< Large Shield Dome */
-    
-    T_END,               /*!< Number of Items - can be used for loop e.g. */
-    T_SHIPEND = T_RAK,  /*!< placeholder (e.g. for loops) */
+
+    T_END,              /*!< Number of Items (Ships + Def) - can be used for loop e.g. */
+    T_SHIPEND = T_RAK,  /*!< Number of Ships (e.g. for loops) */
 };
 
 /*!
@@ -140,12 +140,18 @@ struct SPEEDKERNEL_API Res
 	Res(__int64 a, __int64 b, __int64 c) { met = a; kris = b; deut = c; };
 	Res(__int64 a, __int64 b) { met = a; kris = b; deut = 0; };
 	Res() { met = 0; kris = 0; deut = 0; };
-	void operator/=(float num)
+	/*void operator/=(float num)
 	{
 	    met /= num;
 		kris /= num;
 		deut /= num;
-	};
+	};*/
+    void operator/=(int num)
+	{
+	    met /= num;
+		kris /= num;
+		deut /= num;
+	}
 
 	void operator+=(const Res& r)
 	{
@@ -183,10 +189,25 @@ struct SPEEDKERNEL_API Res
 		return Res(met / num, kris / num, deut / num);
 	}
 
+    Res operator/(int num)
+    {
+        return Res(met / num, kris / num, deut / num);
+    }
+
 	Res operator*(float num)
 	{
 		return Res(met * num, kris * num, deut * num);
 	}
+
+    Res operator*(int num)
+    {
+        return Res(met * num, kris * num, deut * num);
+    }
+
+    Res operator*(double num)
+    {
+        return Res(met * num, kris * num, deut * num);
+    }
 
 	bool operator!=(const Res& r)
 	{
@@ -235,9 +256,9 @@ struct SPEEDKERNEL_API PlaniPos
     //! Constructor to set positions immediatly
 	PlaniPos(int g, int s, int p) { Gala = g; Sys = s; Pos = p; bMoon = false;};
     //! Constructor, where first param contains string with the position in format GG:SSS:PP
-    PlaniPos(TCHAR* c) { *this = PlaniPos(genstring(c)); };
+    PlaniPos(const TCHAR* c) { *this = PlaniPos(genstring(c)); };
 	//! \sa PlaniPos(TCHAR* c)
-    PlaniPos(genstring p)
+    PlaniPos(const genstring p)
 	{
         bMoon = false;
 		size_t f, f2;
@@ -275,7 +296,7 @@ struct SPEEDKERNEL_API BattleResult
     float AttWon, DefWon, Draw;
 	//! Name of target planet
     TCHAR PlaniName[64];
-    //! Taget planet position
+    //! Target planet position
 	PlaniPos Position;
     //! Losses of attacker
 	Res VerlusteAngreifer;
@@ -297,9 +318,9 @@ struct SPEEDKERNEL_API BattleResult
     Res MaxVerlAtt;
     //! Min. losses for attacker
 	Res MinVerlAtt;
-	//! Man. losses for defender
+	//! Max. losses for defender
     Res MaxVerlDef;
-    //! Mix. losses for defender
+    //! Min. losses for defender
 	Res MinVerlDef;
     //! Worth of attacking fleet
 	Res WertAtt;
@@ -349,9 +370,12 @@ struct SPEEDKERNEL_API BattleResult
     int iNeededCapacity;
     //! recycler fly time
     int RecFlyTime[MAX_PLAYERS_PER_TEAM];
+    //! recyler fuel usage
+    int RecFuel[MAX_PLAYERS_PER_TEAM];
 
     BattleResult()
     {
+        memset(PlaniName, 0, 64);
         VerlusteAngreifer = VerlusteVerteidiger = VerlVertmitAufbau = GesVerlust = TF = Res();
         MaxTF = MinTF = GesTF = MaxVerlAtt = MaxVerlDef = MinVerlAtt = MinVerlDef = WertAtt = WertDef = Res();
         Beute = GesamtBeute = RessDa = GewinnMitTF = GewinnOhneTF = GewinnMitHalfTF = Res();
@@ -361,10 +385,13 @@ struct SPEEDKERNEL_API BattleResult
         NumRecs = MaxNumRecs = MinNumRecs = GesamtRecs = 0;
         NumRounds = NumAtts = Ausbeute = SpritVerbrauch = FlyTime = iNeededCapacity = 0;
         for(int i = 0; i < MAX_PLAYERS_PER_TEAM; i++)
+        {
             RecFlyTime[i] = 0;
+            RecFuel[i] = 0;
+        }
     }
 
-	void operator/=(float num)
+	/*void operator/=(float num)
 	{
 		VerlusteAngreifer /= num;
 		VerlusteVerteidiger /= num;
@@ -378,12 +405,61 @@ struct SPEEDKERNEL_API BattleResult
 		MaxNumRecs /= num;
 		MinNumRecs /= num;
 		NumRounds /= num;
-		Beute /= num; 
+		Beute /= num;
+        AttWon /= num;
+        DefWon /= num;
+        Draw /= num;
+		Ausbeute /= num;
+	};*/
+    void operator/=(int num)
+	{
+		VerlusteAngreifer /= num;
+		VerlusteVerteidiger /= num;
+		MaxVerlAtt /= num;
+		MaxVerlDef /= num;
+		MinVerlAtt /= num;
+		MinVerlDef /= num;
+		MaxTF /= num;
+		TF /= num;
+		NumRecs /= num;
+		MaxNumRecs /= num;
+		MinNumRecs /= num;
+		NumRounds /= num;
+		Beute /= num;
         AttWon /= num;
         DefWon /= num;
         Draw /= num;
 		Ausbeute /= num;
 	};
+};
+
+/*!
+    \struct BattleResult
+    \brief This struct contains information about the battle result after an IPM combat
+*/
+struct SPEEDKERNEL_API IPMBattleResult
+{
+    //! Losses of attacker
+    Res LossesAttacker;
+    //! Losses of defender
+    Res LossesDefender;
+    //! Needed missiles to destroy whole defense
+    int NeededMissiles;
+    //! Number of remaining interplanitary missiles
+    int NumIPM;
+    //! Number of remaining anti-ballistic missiles
+    int NumABM;
+    //! Name of target planet
+    TCHAR PlaniName[64];
+    //! Target planet position
+    PlaniPos Position;
+
+    IPMBattleResult()
+    {
+        NeededMissiles = 0;
+        NumIPM = 0;
+        NumABM = 0;
+    }
 };
 
 /*!
@@ -418,34 +494,51 @@ struct SPEEDKERNEL_API WaveInfo {
     }
 };
 
+/*!
+    \enum ReportData
+    \brief This enum describes how much information could be obtained from an espionage report
+*/
 enum ReportData {
-    REPORT_ALL,
+    REPORT_ALL,     /*< got all information */
     REPORT_DEFENCE,
     REPORT_FLEET,
     REPORT_RES
 };
 
-/*
+/*!
     \struct TargetInfo
     \brief This structure contains all information about a target planet.
 */
 struct SPEEDKERNEL_API TargetInfo
 {
+    //! Position of the target
     PlaniPos Pos;
+    //! Target name
     TCHAR Name[64];
+    //! fleet deplyed there
     vector<SItem> Fleet;
+    //! built defence
     vector<SItem> Defence;
+    //! amount of ABMs
+    int NumABM;
+    //! resources
     Res Resources;
+    //! current ShipTechs
     ShipTechs Techs;
+    //! information available from the espionage report
     ReportData State;
-    
+    //! engines
+    int Engines[3];
+
     TargetInfo()
     {
         Pos = PlaniPos();
         memset(&Name, 0, 64);
+        memset(Engines, 0, 3 * sizeof(int));
         Resources = Res();
         Techs = ShipTechs();
         State = REPORT_RES;
+        NumABM = 0;
     }
     const TargetInfo& operator=(const TargetInfo& ti)
     {
@@ -459,6 +552,7 @@ struct SPEEDKERNEL_API TargetInfo
         Techs = ti.Techs;
         State = ti.State;
         Pos = ti.Pos;
+        NumABM = ti.NumABM;
         return *this;
     }
 };

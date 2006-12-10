@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <vector>
 #include <ctime>
 #include <string>
+#include <sstream>
 #include <cmath>
 #include <algorithm>
 #include <map>
@@ -36,6 +37,7 @@ using namespace std;
 #include "SKernel_Defs.h"
 #include "SKernel_Structs.h"
 #include "CIniFile.h"
+#include "utf8.h"
 
 //! The SpeedKernel Class which contains all simulating/reading functions
 /*!
@@ -55,7 +57,7 @@ public:
     static CSpeedKernel& GetInstance();
     //! Force new Instance - breaks sigleton class but needed for
     CSpeedKernel& ForceNewInstance();
-    
+
     ~CSpeedKernel();
 
     //! Simulate starts a simulation
@@ -64,22 +66,25 @@ public:
         \sa SetFleet()
     */
     bool Simulate(int count = 1);
-    
+
     //! Aborts the simulation - works only, if you simulate in a different thread
     void AbortSim();
-    
+
     //! reset all options / SpeedSimData
     void Reset();
-    
+
+    //! simulates an ip missiles attack
+    IPMBattleResult SimulateIPM(int NumIPM, int NumABM, int FleetID, ITEM_TYPE PrimaryItem = T_RAK);
+
     //! \name Fleet related functions
     //! Functions important for fleet information
     //@{
     //! Gets the worth of the currently set fleet
     void GetFleetWorth(Res &att, Res &def);
-    
+
     //! Gets the worth of a fleet
     Res GetFleetWorth(vector<SItem> *Fleet);
-    
+
     //! Sets a fleet - those fleets will fight each other when you simulate
     /*!
         Please only set different fleets (for Alliance Combat System) in the correct order
@@ -88,7 +93,18 @@ public:
         \sa GetSetFleet(), GetFleetAfterSim()
     */
 	bool SetFleet(vector<SItem>* Attacker, vector<SItem>* Defender);
-    
+
+    //! Sets a fleet - overloaded function of SetFleet for those who like arrays more
+    /*!
+        Please only set different fleets (for Alliance Combat System) in the correct order
+        or one by another.
+        Fleets with the same ID will be overwritten
+        \sa SetFleet()
+        \param[in] size_att Array size of 'Attacker'
+        \param[in] size_def Array size of 'Defender'
+    */
+    bool SetFleet(SItem* Attacker, SItem* Defender, int size_att, int size_def);
+
     //! Gets the fleets, which survived with the used Fleet ID
     /*!
         Both SItem arrays must have the length T_END - or else there will be an access violation
@@ -96,12 +112,12 @@ public:
         \param[out] Attacker, Defender can be NULL if you want to set only one of them
         \param[in] FleetID ID of the fleet of the attacker/defender you want to get
     */
-    
+
     bool GetFleetAfterSim(SItem* Attacker, SItem* Defender, int FleetID);
-    
+
     //! vector version of the other version
     bool GetFleetAfterSim(vector<SItem>* Attacker, vector<SItem>* Defender, int FleetID);
-    
+
     //! Returns the current set fleet for a certain FleetID
     /*!
         \param[out] Attacker, Defender array size has to be T_END
@@ -110,7 +126,7 @@ public:
     */
     bool GetSetFleet(SItem* Attacker, SItem* Defender, int FleetID);
     bool GetSetFleet(vector<SItem>* Attacker, vector<SItem>* Defender, int FleetID);
-    
+
     //! Sets the Technologies for a certain attacker and defender
     /*!
         \returns true if successful or false, if not
@@ -125,7 +141,7 @@ public:
         Returns the ships technologies for the attacker and defender
     */
     void GetTechs(ShipTechs* att, ShipTechs* def, DWORD PlayerID);
-    
+
     //! Sets the speed for a certain attacker
     /*!
         The size att and def must be both 3
@@ -145,13 +161,13 @@ public:
     //@}
     //! Rebuilds defense, removes the robbered resources and sets the best case for the attacker for the fleets
     void SetRemainingItemsInDef();
-    
+
 
     //! \name Reading Functions
     //!  Functions for reading in several texts from OGame
     //@{
     /** Reading functions for reading in several OGame texts */
-    
+
     //! Reads in an espionage report
     //! \param[out] ti Contains information read in
     bool ReadEspReport(genstring& r, TargetInfo& ti);
@@ -164,7 +180,7 @@ public:
 	//! Reads in the overview if you're being attacked and have a espionage technology > 7
     //! \sa GeneralRead()
     bool ReadOverview(const genstring& s, int FleetID);
-    //! Reads the fleet from the fleet menu 
+    //! Reads the fleet from the fleet menu
     //! \sa GeneralRead()
     bool ReadOwnFleet(const genstring &OwnFleet, int FleetID);
     //! Reads in a combat report
@@ -220,7 +236,7 @@ public:
     //! Sets if the best/worst case data should be collected and the html generated
     /*! \sa GenerateBestWorseCase */
 	void SetComputeBestWorstCase(bool how);
-    
+
     //! Sets the starting position for a attacker
     /*
         This is needed for correct fuel calculation
@@ -231,9 +247,9 @@ public:
     /*! \sa SetOwnPosition() */
     void GetOwnPosition(PlaniPos& p, int FleetID);
     //! Sets information for defender
-    void SetTargetInfo(TargetInfo TI, int FleetID);
+    void SetTargetInfo(TargetInfo TI, int FleetID, bool ResetWavesState = true);
     //! Get the information of defender
-    TargetInfo GetTargetInfo();
+    TargetInfo GetTargetInfo(int FleetID);
 
     //! Resets the state wave
     void ResetWaveState();
@@ -245,14 +261,21 @@ public:
     void SetCSSFiles(TCHAR* cr_css, TCHAR* bwc_css);
     //@}
     //! Generates the BWC html into file
-    /*! 
+    /*!
         \return false if file could not created or the data hasn't been collected. Else true will be returned.
         \sa SetComputeBestWorstCase
     */
-    bool GenerateBestWorseCase(const char* file);
+    bool GenerateBWC(const char* file);
+    //! \return The BestWorst-Case HTML data (is in UTF-8 format)
+    string GenerateBWC();
+
     //! Generates the combat report
     //! \return false if file could not created or else true
 	bool GenerateCR(const char* file);
+
+    //! Generates combat report
+    //! \return string containg the html data (is in UTF-8 format)
+    string GenerateCR();
 
     //! returns the battle result information
     /*!
@@ -312,7 +335,7 @@ public:
     /*!
         \return false, if an error occurred
     */
-    bool LoadLangFile(char *langfile);
+    bool LoadLangFile(const char *langfile);
 
     //! loads RF values from a RF-ini file
     /*!
@@ -364,11 +387,11 @@ private:
 #ifdef CREATE_ADV_STATS
     void CreateAdvShipStats();
 #endif
-    
-    void SaveShipsToCR(int round);	
+
+    void SaveShipsToCR(int round);
 	void ComputeCRArrays();
-    void GenerateCRTable(genstring &out, const vector<SItem> &Items, int Team, int Player, TCHAR* Title);
-	
+    void GenerateCRTable(genstrstream &out, const vector<SItem> &Items, int Team, int Player, TCHAR* Title);
+
     int GetDistance(const PlaniPos& b, const PlaniPos& e);
     DWORD ComputeFlyTime(const PlaniPos& b, const PlaniPos& e, int FleetID, const vector<SItem>& vFleet);
     int GetShipSpeed(ITEM_TYPE Ship, int FleetID);
@@ -377,11 +400,11 @@ private:
     //genstring ReadStringFromIniFile(char *inifile, const TCHAR *Section, const TCHAR *KeyName);
     //bool ReadLine(FILE *file, TCHAR *out, int max_length);
     Res StringToRes(const genstring &val);
-       
+
     void InitRand();
     ULONG RandomNumber(ULONG Max);
     TCHAR* AddPointsToNumber(__int64 value, TCHAR* out);
-    
+
     Obj FillObj(ITEM_TYPE Type, int Team, DWORD PlayerID);
     static bool ItemCompare(const SItem& a, const SItem& b);
 
@@ -407,13 +430,13 @@ private:
 
 	// pointer to function which outputs number of rounds and simulations
     void (*m_FuncPtr)(int sim, int round);
-	
+
 	vector<SItem> m_NumShipsAtt;
 	vector<SItem> m_NumShipsDef;
 
 	vector<SItem> m_NumSetShipsAtt;
 	vector<SItem> m_NumSetShipsDef;
-	
+
 	vector<SItem> m_NumShipsInKBAtt[7], m_NumShipsInKBDef[7];
 	DWORD m_NumShotsPerRoundAtt[6], m_NumShotsPerRoundDef[6];
 	double m_ShotStrengthAtt[6], m_ShotStrengthDef[6];
@@ -433,7 +456,7 @@ private:
 
 	vector<Obj>* m_AttObj, *m_DefObj;
     int m_NumPlayersPerTeam[2];
-	
+
 	int m_BestCaseAtt[T_END];
 	int m_BestCaseDef[T_END];
 	int m_WorstCaseAtt[T_END];
@@ -451,15 +474,16 @@ private:
 	bool m_SimulateFreedItsData;
     bool m_InitSim;
     bool m_LastScanHadTechs;
-    
+    bool m_BracketNames;
+
     bool m_NewShield;
     float m_DefRebuildFac;
     bool m_ShipDataFromFile;
 
     // translations strings
-    genstring m_FleetNames[T_END+1];
-    genstring m_altFleetNames[T_END];
-    genstring m_KBNames[T_END+1];
+    genstring m_FleetNames[T_END + 2];
+    genstring m_altFleetNames[T_END + 1];
+    genstring m_KBNames[T_END + 1];
     // techs: 1=weap, 2=shield, 3=hull, 4=combustion, 5=Impuls, 6=hyperspace
     genstring m_TechNames[6];
     // stop string for esp. reports
@@ -482,7 +506,7 @@ private:
     // text before the technology level
     genstring m_TechPreString;
     genstring m_Attacker, m_Defender;
-    
+
     // CR-table down from top
     genstring m_KBTable[5];
     // 1-weapons, 2-shields, 3-hull
@@ -497,9 +521,9 @@ private:
     genstring m_HTML_Charset;
 
     genstring m_BWC_CSS, m_CR_CSS;
-	
+
 	genstring m_Bilanzstrings[10];
-    
+
     // 0-min, 1-Max, 2-average, 3-Sum, 4 -debris 5- ship, 6- after rebuild 7-best 8-worst
     genstring m_BWTable[9];
     // 1-title 2-Best/Worst Case for attacker, 3- ..for defender
@@ -509,7 +533,8 @@ private:
 
 	PlaniPos m_OwnPos[MAX_PLAYERS_PER_TEAM];
 
-    TargetInfo m_LastTarget;
+    TargetInfo m_DefenderInfos[MAX_PLAYERS_PER_TEAM];
+    //TargetInfo m_LastTarget;
 
 	ShipTechs m_TechsAtt[MAX_PLAYERS_PER_TEAM];
 	ShipTechs m_TechsDef[MAX_PLAYERS_PER_TEAM];
@@ -520,7 +545,7 @@ private:
 
     // RF-values read from file
     int m_RF[T_END][T_END];
-    
+
     // names of ships in ini-files
     genstring m_IniFleetNames[T_END];
     // unit costs

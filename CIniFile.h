@@ -32,24 +32,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #undef _tcslen
 #undef _tcstol
-#undef _tolower
-#undef _toupper
 
+#define UNICODE
 #ifdef UNICODE
 typedef wchar_t TCHAR;
 #define _T(x) L ## x
 #define _tcslen wcslen
 #define _tcstol wcstol
-#define _tolower towlower
-#define _toupper towupper
 #else
 typedef char TCHAR;
 #define _T(x) x
 #define _tcslen strlen
 #define _tcstol strtol
-#define _tolower tolower
-#define _toupper toupper
-#endif
+#endif // UNICODE
+
+#ifdef LINUX
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif //LINUX
 
 using namespace std;
 
@@ -78,7 +79,7 @@ public:
     bool ReadIniFile(const char* file, bool append = false);
     // writes current ini data into file
     bool WriteIniFile(const char* file, bool write_unicode = false);
-    
+
     bool GetStr(genstr& val, genstr strSection, genstr strKey);
     bool GetLong(long& val, genstr strSection, genstr strKey);
     bool RemoveKey(genstr strSection, genstr strKey);
@@ -96,7 +97,7 @@ private:
     genstr RemoveSpaces(genstr str, bool remove_first, bool remove_last);
     // converts a string into upper or lower case
     genstr ChgCase(genstr str, bool to_upper);
-    
+
     // to save strings in correct case (reading=case insensitive, writing=case sensitive)
     // (only for keys and sections)
     map<genstr, genstr> m_mRealSecNames;
@@ -104,8 +105,8 @@ private:
 
     typedef map<genstr, map<genstr, genstr> > IniData;
     IniData m_mIniData;
-    
-    
+
+
     bool m_DelFirstSpaces;
     bool m_DelLastSpaces;
 };

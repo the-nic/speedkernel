@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2006 Maximialian MatthÃ© & Nicolas HÃ¶ft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -25,14 +25,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	-General Functions-
 
 	Function listing:
-		
+
 		Numbers and names of units:
 			void ItemName(ITEM_TYPE t, TCHAR* out);
 			genstring ItemName(ITEM_TYPE t);
             genstring ItemName2(ITEM_TYPE t);
 			ITEM_TYPE GetItemType(genstring& name);
             genstring CRItemName(ITEM_TYPE t);
-            
+
 
 		Math functions:
             void InitRand();
@@ -103,7 +103,7 @@ void CSpeedKernel::ItemName(ITEM_TYPE t, TCHAR* out)
     if(t >= T_KT && t <= T_GS)
         _tcscpy(out, m_FleetNames[t].c_str());
     else
-        _tcscpy(out, m_FleetNames[T_END].c_str());//"Unknown"
+        _tcscpy(out, m_FleetNames[T_END + 1].c_str());//"Unknown"
 }
 
 void CSpeedKernel::ItemIniName(ITEM_TYPE Type, TCHAR* out) {
@@ -114,30 +114,30 @@ void CSpeedKernel::ItemIniName(ITEM_TYPE Type, TCHAR* out) {
 // returns name as genstring
 genstring CSpeedKernel::ItemName(ITEM_TYPE t)
 {
-	if(t >= T_KT && t <= T_GS)
+	if(t >= T_KT && t <= T_END)
         return m_FleetNames[t];
     else
-        return m_FleetNames[T_END]; //'Unknown'
+        return m_FleetNames[T_END + 1]; //'Unknown'
 }
 
 genstring CSpeedKernel::ItemName2(ITEM_TYPE t) {
     if(t >= T_KT && t <= T_GS)
         return m_altFleetNames[t];
     else
-        return m_FleetNames[T_END]; //'Unknown'
+        return m_FleetNames[T_END + 1]; //'Unknown'
 }
 
 genstring CSpeedKernel::CRItemName(ITEM_TYPE t) {
 	if(t >= T_KT && t <= T_GS)
         return m_KBNames[t];
     else
-        return m_FleetNames[T_END]; //'Unknown'
+        return m_FleetNames[T_END + 1]; //'Unknown'
 }
 
 // returns item type from name
 ITEM_TYPE CSpeedKernel::GetItemType(genstring& name)
 {
-    for(int i = 0; i < T_END; i++) {
+    for(int i = 0; i <= T_END; i++) {
         if(name == m_FleetNames[i] || name == m_altFleetNames[i] || name == m_KBNames[i] )
             return (ITEM_TYPE)i;
     }
@@ -177,7 +177,7 @@ void CSpeedKernel::ComputeShipData()
         Kosten[T_PLASMA] = Res(50000, 50000, 30000);
         Kosten[T_KS] = Res(10000, 10000);
         Kosten[T_GS] = Res(50000, 50000);
-        
+
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_KT] = 10;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_GT] = 25;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_LJ] = 10;
@@ -199,7 +199,7 @@ void CSpeedKernel::ComputeShipData()
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_PLASMA] = 300;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_KS] = 2000;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_GS] = 10000;
-        
+
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_KT] = 5;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_GT] = 5;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_LJ] = 50;
@@ -221,7 +221,7 @@ void CSpeedKernel::ComputeShipData()
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_PLASMA] = 3000;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_KS] = 1;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_GS] = 1;
-        
+
     }
     int i;
     for(i = 0; i < T_END; i++)
@@ -242,7 +242,8 @@ void CSpeedKernel::ComputeShipData()
 	LadeKaps[T_SS] = 1500;
 	LadeKaps[T_KOLO] = 7500;
 	LadeKaps[T_REC] = 20000;
-	LadeKaps[T_SPIO] = 5;
+	// changed since OGame 0.74a
+    LadeKaps[T_SPIO] = 0;
 	LadeKaps[T_BOMBER] = 500;
 	LadeKaps[T_ZER] = 2000;
 	LadeKaps[T_TS] = 1000000;
@@ -252,11 +253,11 @@ void CSpeedKernel::ComputeShipData()
         double DamFak_a = (10 + m_TechsAtt[ID].Weapon) / 10.0f;
         double ShFak_a = (10 + m_TechsAtt[ID].Shield) / 10.0f;
         double LifeFak_a = (10 + m_TechsAtt[ID].Armour) / 10.0f;
-        
+
         double DamFak_v = (10 + m_TechsDef[ID].Weapon) / 10.0f;
         double ShFak_v = (10 + m_TechsDef[ID].Shield) / 10.0f;
         double LifeFak_v = (10 + m_TechsDef[ID].Armour) / 10.0f;
-        
+
         for(i = 0; i < T_END; i++)
         {
             MaxLifes[ID][DEFFER][i] = MaxLifes[MAX_PLAYERS_PER_TEAM][ATTER][i];
@@ -267,11 +268,11 @@ void CSpeedKernel::ComputeShipData()
             MaxShields[ID][ATTER][i] = MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][i];
             Dams[ID][ATTER][i] = Dams[MAX_PLAYERS_PER_TEAM][ATTER][i];
 
-            
+
             MaxLifes[ID][DEFFER][i] *= LifeFak_v;
             MaxShields[ID][DEFFER][i] *= ShFak_v;
             Dams[ID][DEFFER][i] *= DamFak_v;
-            
+
             MaxLifes[ID][ATTER][i] *= LifeFak_a;
             MaxShields[ID][ATTER][i] *= ShFak_a;
             Dams[ID][ATTER][i] *= DamFak_a;
@@ -337,7 +338,7 @@ R80:
         mov p1, 0         // initialize buffer pointers
         mov p2, 80
     }
-#else 
+#else
     int i, j;
 
     for(i = 0; i < 17; i++) {
@@ -423,10 +424,10 @@ DWORD CSpeedKernel::ComputeFlyTime(const PlaniPos& b, const PlaniPos& e, int Fle
             return 0;
     if(b.Gala != e.Gala)
         return 10 + (3500.0f / m_Speed[FleetID] * sqrt((abs((int)(b.Gala-e.Gala)) * 20000000.0f) / GetFleetSpeed(FleetID, vFleet)));
-    
+
     if(b.Sys != e.Sys)
         return 10 + (3500.0f / m_Speed[FleetID] * sqrt((2700000.0f + abs((int)(b.Sys-e.Sys)) * 95000.0f) / GetFleetSpeed(FleetID, vFleet)));
-    
+
     if(b.Pos != e.Pos)
         return 10 + (3500.0f / m_Speed[FleetID] * sqrt((1000000.0f + abs((int)(b.Pos-e.Pos)) * 5000.0f) / GetFleetSpeed(FleetID, vFleet)));
     return 0;
@@ -489,7 +490,7 @@ void CSpeedKernel::SetRemainingItemsInDef()
 
 	SetFleet(NULL, &items);
 	m_Result.RessDa -= m_Result.Beute;
-    
+
     m_Waves.TotalPlunder = m_Result.GesamtBeute;
 	m_Waves.NumAtts = m_Result.NumAtts;
     m_Waves.TotalRecs = m_Result.GesamtRecs;
@@ -499,36 +500,40 @@ void CSpeedKernel::SetRemainingItemsInDef()
 
 TCHAR* CSpeedKernel::AddPointsToNumber(__int64 value, TCHAR* out)
 {
+    int i;
     PR_PROF_FUNC(F_ADDPTONUMBER);
+    genstrstream dat;
 
     bool neg = false;
-    if(value < INT_MAX && value > INT_MIN)
-        _stprintf(out, _T("%d"), value);
-    else {
-        if((value % 1000 == 0) && (value / 1000 < INT_MAX) && ((value / 1000 > INT_MIN))) {
-            value /= 1000;
-            _stprintf(out, _T("%I64d"), value);
-            _tcscat(out, _T("000"));
-        }
-        else
-            _stprintf(out, _T("%I64d"), value);
-    }
-    genstring c = out;
-    div_t res;
+#if _MSC_VER < 1400 && defined(_MSC_VER)
+    TCHAR tmp[512];
+    _stprintf(tmp, _T("%I64d"), value);
+    dat << tmp;
+#else
+    dat << value;
+#endif
+
+    genstring c = dat.str();
+
     if(value < 0) {
-        c.erase(0,1);
+        c.erase(0, 1);
         neg = true;
     }
-    res = div(c.length(), 3);
-    if(res.rem == 0)
-        res.quot--;
-    for(int i = 1; i <= res.quot; i++) {
-        c.insert(c.length()-i*3-i+1, _T("."));
+
+    int l = _tcslen(c.c_str());
+    int quot = (int)l / 3;
+    int rem = l % 3;
+    if(rem == 0)
+        quot--;
+    for(i = 1; i <= quot; i++)
+    {
+        c.insert(l - i * 4 + 1, _T("."));
+        l++;
     }
     if(neg)
         c.insert(0, _T("-"));
-    _tcscpy(out, c.data());
-    
+    _tcscpy(out, c.c_str());
+
     return out;
 }
 
@@ -553,13 +558,13 @@ Res CSpeedKernel::GetFleetWorth(vector<SItem> *Fleet) {
     return worth;
 }
 
-bool CSpeedKernel::LoadLangFile(char *langfile) {
+bool CSpeedKernel::LoadLangFile(const char *langfile) {
     if(!langfile) {
         // init german strings
         m_FleetNames[T_KT] = _T("Kleiner Transporter");
-        m_FleetNames[T_GT] = _T("Großer Transporter");
-        m_FleetNames[T_LJ] = _T("Leichter Jäger");
-        m_FleetNames[T_SJ] = _T("Schwerer Jäger");
+        m_FleetNames[T_GT] = _T("GroÃŸer Transporter");
+        m_FleetNames[T_LJ] = _T("Leichter JÃ¤ger");
+        m_FleetNames[T_SJ] = _T("Schwerer JÃ¤ger");
         m_FleetNames[T_KREUZER] = _T("Kreuzer");
         m_FleetNames[T_SS] = _T("Schlachtschiff");
         m_FleetNames[T_SPIO] = _T("Spionagesonde");
@@ -567,17 +572,18 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
         m_FleetNames[T_REC] = _T("Recycler");
         m_FleetNames[T_BOMBER] = _T("Bomber");
         m_FleetNames[T_SAT] = _T("Solar Satellit");
-        m_FleetNames[T_ZER] = _T("Zerstörer");
+        m_FleetNames[T_ZER] = _T("ZerstÃ¶rer");
         m_FleetNames[T_TS] = _T("Todesstern");
         m_FleetNames[T_RAK] = _T("Raketenwerfer");
-        m_FleetNames[T_LL] = _T("Leichtes Lasergeschütz");
-        m_FleetNames[T_SL] = _T("Schweres Lasergeschütz");
-        m_FleetNames[T_IONEN] = _T("Ionengeschütz");
-        m_FleetNames[T_GAUSS] = _T("Gaußkanone");
+        m_FleetNames[T_LL] = _T("Leichtes LasergeschÃ¼tz");
+        m_FleetNames[T_SL] = _T("Schweres LasergeschÃ¼tz");
+        m_FleetNames[T_IONEN] = _T("IonengeschÃ¼tz");
+        m_FleetNames[T_GAUSS] = _T("GauÃŸkanone");
         m_FleetNames[T_PLASMA] = _T("Plasmawerfer");
         m_FleetNames[T_KS] = _T("Kleine Schildkuppel");
-        m_FleetNames[T_GS] = _T("Große Schildkuppel");
-        m_FleetNames[T_END] = _T("Unbekannt");
+        m_FleetNames[T_GS] = _T("GroÃŸe Schildkuppel");
+        m_FleetNames[T_END] = _T("Abfangrakete");
+        m_FleetNames[T_END + 1] = _T("Unbekannt");
         m_altFleetNames[T_GT] = _T("Grosser Transporter");
         m_altFleetNames[T_LJ] = _T("Leichter Jaeger");
         m_altFleetNames[T_SJ] = _T("Schwerer Jaeger");
@@ -590,8 +596,8 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
         m_altFleetNames[T_GS] = _T("Grosse Schildkuppel");
         m_KBNames[T_KT] = _T("Kl.Trans");
         m_KBNames[T_GT] = _T("Gr.Trans");
-        m_KBNames[T_LJ] = _T("L.Jäger");
-        m_KBNames[T_SJ] = _T("S.Jäger");
+        m_KBNames[T_LJ] = _T("L.JÃ¤ger");
+        m_KBNames[T_SJ] = _T("S.JÃ¤ger");
         m_KBNames[T_KREUZER] = _T("Kreuzer");
         m_KBNames[T_SS] = _T("Schlachts.");
         m_KBNames[T_REC] = _T("Recy.");
@@ -605,7 +611,7 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
         m_KBNames[T_LL] = _T("L.Laser");
         m_KBNames[T_SL] = _T("S.Laser");
         m_KBNames[T_IONEN] = _T("Ion.W");
-        m_KBNames[T_GAUSS] = _T("Gauß");
+        m_KBNames[T_GAUSS] = _T("GauÃŸ");
         m_KBNames[T_PLASMA] = _T("Plasma");
         m_KBNames[T_KS] = _T("S.Kuppel");
         m_KBNames[T_GS] = _T("GS.Kuppel");
@@ -638,23 +644,23 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
         m_TechPreString = _T("Stufe");
         m_Attacker = _T("Angreifer");
         m_Defender = _T("Verteidiger");
-        
+
         m_KBTable[0] = _T("Typ");
         m_KBTable[1] = _T("Anz.");
         m_KBTable[2] = _T("Bewaff.");
         m_KBTable[3] = _T("Schilde");
-        m_KBTable[4] = _T("Hülle");
+        m_KBTable[4] = _T("H&uuml;lle");
 
         m_KBTechs[0] = _T("Waffen");
         m_KBTechs[1] = _T("Schilde");
-        m_KBTechs[2] = _T("Hülle");
-        m_KBRoundStr[0] = _T("Die angreifende Flotte schießt insgesamt %d mal mit Gesamtstärke %.0f auf den Verteidiger");
+        m_KBTechs[2] = _T("HÃ¼lle");
+        m_KBRoundStr[0] = _T("Die angreifende Flotte schie&szlig;t insgesamt %d mal mit Gesamtst&auml;rke %.0f auf den Verteidiger");
         m_KBRoundStr[1] = _T("Die Schilde des Verteidigers absorbieren %.0f Schadenspunkte");
-        m_KBRoundStr[2] = _T("Die verteidigende Flotte schießt insgesamt %d mal mit Gesamtstärke %.0f auf den Angreifer");
+        m_KBRoundStr[2] = _T("Die verteidigende Flotte schie&szlig;t insgesamt %d mal mit Gesamtst&auml;rke %.0f auf den Angreifer");
         m_KBRoundStr[3] = _T("Die Schilde des Angreifers absorbieren %.0f Schadenspunkte");
         m_KBResult[0] = _T("Der Angreifer hat die Schlacht gewonnen!");
         m_KBResult[1] = _T("Der Verteidiger hat die Schlacht gewonnen!");
-        m_KBResult[2] = _T("Die Schlacht endet unentschieden. Beide Flotten ziehen sich auf ihre Heimatplaneten zurück.");
+        m_KBResult[2] = _T("Die Schlacht endet unentschieden. Beide Flotten ziehen sich auf ihre Heimatplaneten zur&uuml;ck.");
         m_KBResult[3] = _T("Es kann kein Kampfergebnis ausgegeben werden, weil der Kampf noch gar nicht simuliert worden ist.");
         m_KBResult[4] = _T("Das Ergebnis des Kampfes ist nicht exakt vorrauszusehen.");
         m_KBResult[5] = _T("Er erbeutet %d Metall, %d Kristall und %d Deuterium");
@@ -664,37 +670,42 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
         m_KBLoss[0] = _T("Der Angreifer hat insgesamt %s Units + %s Deuterium verloren.");
         m_KBLoss[1] = _T("Der Verteidiger hat insgesamt %s Units + %s Deuterium verloren.");
         m_KBLoss[2] = _T("Auf diesen Raumkoordinaten liegen nun %s Metall und %s Kristall");
-        m_KBMoon = _T("Die Chance einer Mondentstehung beträgt %d%%");
+        m_KBMoon = _T("Die Chance einer Mondentstehung betr&auml;gt %d%%");
         // western european charset
+#ifdef UNICODE
+        m_HTML_Charset = _T("utf-8");
+#else
         m_HTML_Charset = _T("ISO-8859-1");
+#endif // UNICODE
 
         m_BWTable[0] = _T("Minimal");
         m_BWTable[1] = _T("Durchschnittlich");
         m_BWTable[2] = _T("Maximal");
         m_BWTable[3] = _T("Summe");
-        m_BWTable[4] = _T("Trümmerfeld");
+        m_BWTable[4] = _T("Tr&uuml;mmerfeld");
         m_BWTable[5] = _T("Schiff");
         m_BWTable[6] = _T("Nach Wiederaufbau");
         m_BWTable[7] = _T("Best");
         m_BWTable[8] = _T("Worst");
-        
+
         m_BWLoss[0] = _T("Maximale und Minimale Verluste");
         m_BWLoss[1] = _T("Wert der angreifenden Flotte:");
         m_BWLoss[2] = _T("Wert der verteidigenden Flotte:");
         m_BWLoss[3] = _T("Units");
-        
-        m_BWTitle[0] = _T("Best/Worst Case Berechnung");
-        m_BWTitle[1] = _T("Best/Worst Case für Angreifer");
-        m_BWTitle[2] = _T("Best/Worst Case für Verteidiger");
 
-		m_Bilanzstrings[0] = _T("Bilanz für Angreifer und Verteidiger nach Kampf");
+        m_BWTitle[0] = _T("Best/Worst Case Berechnung");
+        m_BWTitle[1] = _T("Best/Worst Case f&uuml;r Angreifer");
+        m_BWTitle[2] = _T("Best/Worst Case f&uuml;r Verteidiger");
+
+		m_Bilanzstrings[0] = _T("Bilanz f&uuml;r Angreifer und Verteidiger nach Kampf");
 		m_Bilanzstrings[1] = _T("Ohne Einsammeln des TF");
 		m_Bilanzstrings[2] = _T("Bei Einsammeln des halben TF");
 		m_Bilanzstrings[3] = _T("Bei Einsammeln des gesamten TF");
+        m_BracketNames = false;
         return true;
     }
     CIniFile iniFile(langfile);
-    
+
     // normal ship names
     iniFile.GetStr(m_FleetNames[T_KT], _T("Fleet"), _T("KT"));
     iniFile.GetStr(m_FleetNames[T_GT], _T("Fleet"), _T("GT"));
@@ -717,30 +728,32 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
     iniFile.GetStr(m_FleetNames[T_PLASMA], _T("Fleet"), _T("PLAS"));
     iniFile.GetStr(m_FleetNames[T_KS], _T("Fleet"), _T("KS"));
     iniFile.GetStr(m_FleetNames[T_GS], _T("Fleet"), _T("GS"));
-    iniFile.GetStr(m_FleetNames[T_END], _T("Fleet"), _T("UNB"));
-    
+    iniFile.GetStr(m_FleetNames[T_END], _T("Fleet"), _T("ABM"));
+    iniFile.GetStr(m_FleetNames[T_END + 1], _T("Fleet"), _T("UNB"));
+
     // alternative names
-    iniFile.GetStr(m_altFleetNames[T_KT], _T("AltFleet"), _T("KT"));
-    iniFile.GetStr(m_altFleetNames[T_GT], _T("AltFleet"), _T("GT"));
-    iniFile.GetStr(m_altFleetNames[T_LJ], _T("AltFleet"), _T("LJ"));
-    iniFile.GetStr(m_altFleetNames[T_SJ], _T("AltFleet"), _T("SJ"));
-    iniFile.GetStr(m_altFleetNames[T_KREUZER], _T("AltFleet"), _T("KR"));
-    iniFile.GetStr(m_altFleetNames[T_SS], _T("AltFleet"), _T("SS"));
-    iniFile.GetStr(m_altFleetNames[T_SPIO], _T("AltFleet"), _T("SPIO"));
-    iniFile.GetStr(m_altFleetNames[T_KOLO], _T("AltFleet"), _T("KOL"));
-    iniFile.GetStr(m_altFleetNames[T_REC], _T("AltFleet"), _T("REC"));
-    iniFile.GetStr(m_altFleetNames[T_BOMBER], _T("AltFleet"), _T("BOM"));
-    iniFile.GetStr(m_altFleetNames[T_SAT], _T("AltFleet"), _T("SAT"));
-    iniFile.GetStr(m_altFleetNames[T_ZER], _T("AltFleet"), _T("ZER"));
-    iniFile.GetStr(m_altFleetNames[T_TS], _T("AltFleet"), _T("TS"));
-    iniFile.GetStr(m_altFleetNames[T_RAK], _T("AltFleet"), _T("RAK"));
-    iniFile.GetStr(m_altFleetNames[T_LL], _T("AltFleet"), _T("LL"));
-    iniFile.GetStr(m_altFleetNames[T_SL], _T("AltFleet"), _T("SL"));
-    iniFile.GetStr(m_altFleetNames[T_IONEN], _T("AltFleet"), _T("IO"));
-    iniFile.GetStr(m_altFleetNames[T_GAUSS], _T("AltFleet"), _T("GAUSS"));
-    iniFile.GetStr(m_altFleetNames[T_PLASMA], _T("AltFleet"), _T("PLAS"));
-    iniFile.GetStr(m_altFleetNames[T_KS], _T("AltFleet"), _T("KS"));
-    iniFile.GetStr(m_altFleetNames[T_GS], _T("AltFleet"), _T("GS"));
+    iniFile.GetStr(m_altFleetNames[T_KT], _T("AltFleet"), _T("KT2"));
+    iniFile.GetStr(m_altFleetNames[T_GT], _T("AltFleet"), _T("GT2"));
+    iniFile.GetStr(m_altFleetNames[T_LJ], _T("AltFleet"), _T("LJ2"));
+    iniFile.GetStr(m_altFleetNames[T_SJ], _T("AltFleet"), _T("SJ2"));
+    iniFile.GetStr(m_altFleetNames[T_KREUZER], _T("AltFleet"), _T("KR2"));
+    iniFile.GetStr(m_altFleetNames[T_SS], _T("AltFleet"), _T("SS2"));
+    iniFile.GetStr(m_altFleetNames[T_SPIO], _T("AltFleet"), _T("SPIO2"));
+    iniFile.GetStr(m_altFleetNames[T_KOLO], _T("AltFleet"), _T("KOL2"));
+    iniFile.GetStr(m_altFleetNames[T_REC], _T("AltFleet"), _T("REC2"));
+    iniFile.GetStr(m_altFleetNames[T_BOMBER], _T("AltFleet"), _T("BOM2"));
+    iniFile.GetStr(m_altFleetNames[T_SAT], _T("AltFleet"), _T("SAT2"));
+    iniFile.GetStr(m_altFleetNames[T_ZER], _T("AltFleet"), _T("ZER2"));
+    iniFile.GetStr(m_altFleetNames[T_TS], _T("AltFleet"), _T("TS2"));
+    iniFile.GetStr(m_altFleetNames[T_RAK], _T("AltFleet"), _T("RAK2"));
+    iniFile.GetStr(m_altFleetNames[T_LL], _T("AltFleet"), _T("LL2"));
+    iniFile.GetStr(m_altFleetNames[T_SL], _T("AltFleet"), _T("SL2"));
+    iniFile.GetStr(m_altFleetNames[T_IONEN], _T("AltFleet"), _T("IO2"));
+    iniFile.GetStr(m_altFleetNames[T_GAUSS], _T("AltFleet"), _T("GAUSS2"));
+    iniFile.GetStr(m_altFleetNames[T_PLASMA], _T("AltFleet"), _T("PLAS2"));
+    iniFile.GetStr(m_altFleetNames[T_KS], _T("AltFleet"), _T("KS2"));
+    iniFile.GetStr(m_altFleetNames[T_GS], _T("AltFleet"), _T("GS2"));
+    iniFile.GetStr(m_altFleetNames[T_END], _T("Fleet"), _T("ABM2"));
 
     // cr names
     iniFile.GetStr(m_KBNames[T_KT], _T("KBNames"), _T("KB_KT"));
@@ -797,7 +810,7 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
     iniFile.GetStr(m_Ovr[0], _T("ReadStrings"), _T("OVR1"));
     iniFile.GetStr(m_Ovr[1], _T("ReadStrings"), _T("OVR2"));
     iniFile.GetStr(m_Defense, _T("ReadStrings"), _T("DEFSTR"));
-    
+
     // Defense/Techs additional strings
     iniFile.GetStr(m_TechPreString, _T("ReadStrings"), _T("TECHSTR"));
     iniFile.GetStr(m_TechNames[3], _T("ReadStrings"), _T("ENGINE_COMB"));
@@ -834,9 +847,11 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
     iniFile.GetStr(m_KBLoss[2], _T("KBStuff"), _T("KB_TF"));
     iniFile.GetStr(m_KBMoon, _T("KBStuff"), _T("MOON"));
     iniFile.GetStr(m_KBTitle, _T("KBStuff"), _T("KBTITLE"));
+#ifndef UNICODE
     iniFile.GetStr(m_HTML_Charset, _T("KBStuff"), _T("CHARSET"));
     if(m_HTML_Charset == _T(""))
         m_HTML_Charset = _T("ISO-8859-1");
+#endif
 
     // BW-Case
     iniFile.GetStr(m_BWTable[0], _T("BWCFile"), _T("MIN"));
@@ -864,6 +879,11 @@ bool CSpeedKernel::LoadLangFile(char *langfile) {
     iniFile.GetStr(m_Bilanzstrings[2], _T("BAL"), _T("T2"));
     iniFile.GetStr(m_Bilanzstrings[3], _T("BAL"), _T("T3"));
 
+    long i = 0;
+    iniFile.GetLong(i, _T("ReadStrings"), _T("BRACKET_NAMES"));
+    if(i)
+        m_BracketNames = true;
+
     return true;
 }
 
@@ -871,7 +891,7 @@ bool CSpeedKernel::LoadRFFile(char *RFFile) {
     genstring s;
     int i, j;
     CIniFile iniFile(RFFile);
-    
+
     for(i = 0; i < T_END; i++) {
         for(j = 0; j < T_END; j++)
             m_RF[i][j] = 0;
@@ -928,7 +948,7 @@ Res CSpeedKernel::StringToRes(const genstring &val) {
     Res res;
     genstring num;
     genstring::size_type f = 0, f2 = 0;
-    
+
     f = val.find(_T(","));
     num = val.substr(0);
     res.met = _ttoi(num.c_str());
@@ -963,12 +983,12 @@ void CSpeedKernel::FillRFTable(RFTYPE rfType)
             m_RF[T_SPIO][T_SPIO] = 10000;
             m_RF[T_SPIO][T_SAT] = 10000;
             m_RF[T_SAT][T_SAT] = 10000;
-            
+
             m_RF[T_KREUZER][T_LJ] = 3333;
             m_RF[T_KREUZER][T_RAK] = 1000;
 
             m_RF[T_ZER][T_LL] = 1000;
-            
+
             m_RF[T_BOMBER][T_LL] = 500;
             m_RF[T_BOMBER][T_RAK] = 500;
             m_RF[T_BOMBER][T_SL] = 1000;

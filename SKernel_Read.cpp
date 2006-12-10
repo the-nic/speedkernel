@@ -134,14 +134,14 @@ bool CSpeedKernel::ReadEspReport(genstring& r, TargetInfo& TargetData)
                 tmp.erase(f, 1);
             tmp.erase(f, f2 - f + 1);
         }
-        else if((f = tmp.find(_T("("))) != genstring::npos) {
-            f2 = tmp.find(_T(")"));
+        else if((f = tmp.find(_T("("))) != genstring::npos && !m_BracketNames) {
+            f2 = tmp.find(_T(")"), f);
             if(f2 == genstring::npos)
                 tmp.erase(f, 1);
             tmp.erase(f, f2 - f + 1);
         }
         else if((f = tmp.find(_T("["))) != genstring::npos) {
-            f2 = tmp.find(_T("]"));
+            f2 = tmp.find(_T("]"), f);
             if(f2 == genstring::npos)
                 tmp.erase(f, 1);
             tmp.erase(f, f2 - f + 1);
@@ -224,7 +224,7 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
     SItem sit;
     sit.OwnerID = 0;
     int num = 0;
-    for(int i = 0; i < T_END; i++)
+    for(int i = 0; i <= T_END; i++)
     {
         item = ItemName((ITEM_TYPE)i);
         item2 = ItemName2((ITEM_TYPE)i);
@@ -239,8 +239,10 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
                 num += sit.Num = _ttoi(anz.c_str());
                 if(type < T_SHIPEND)
                     ti.Fleet.push_back(sit);
-                else
+                else if(type < T_END)
                     ti.Defence.push_back(sit);
+                else
+                    ti.NumABM = sit.Num;
             }
         }
         // if number if items found zero, try second name

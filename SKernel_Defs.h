@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFFER 1
 
 // version of kernel
-#define KERNEL_VERSION _T("0.9.4.4b")
+#define KERNEL_VERSION _T("0.9.5.2b")
 
 //! default defense rebuild factor
 #define DEF_AUFBAU_FAKTOR 0.80f
@@ -153,6 +153,7 @@ int _stprintf(TCHAR * target, const TCHAR * format, ...);
     Use this type for all strings to be unicode compatible
 */
 typedef basic_string<TCHAR, char_traits<TCHAR>, allocator<TCHAR> > genstring;
+typedef basic_stringstream<TCHAR, char_traits<TCHAR>, allocator<TCHAR> > genstrstream;
 
 #define _STR(x) genstring(_T(x))
 
@@ -176,7 +177,7 @@ typedef unsigned short int  WORD;
 typedef unsigned char       BYTE;
 
 #ifndef _MSC_VER
-    typedef unsigned long long  __int64;
+    typedef long long  __int64;
 #endif //Win32
 
 size_t GetNextNumber(genstring str, int& num, size_t pos = 0);

@@ -87,6 +87,7 @@ CSpeedKernel::CSpeedKernel()
 
     m_NumPlayersPerTeam[ATTER] = 0;
     m_NumPlayersPerTeam[DEFFER] = 0;
+    m_BracketNames = false;
 
     for(r = 0; r < T_SHIPEND; r++) {
         for(int i = 0; i < T_END; i++) {

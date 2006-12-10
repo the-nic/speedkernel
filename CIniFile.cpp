@@ -39,6 +39,14 @@ CIniFile::CIniFile(const char* file, bool remove_leading_spaces, bool remove_tra
 
 bool CIniFile::ReadIniFile(const char* file, bool append)
 {
+#ifdef LINUX
+    stat f_stats;
+    int s_res = stat(file, &f_stats);
+    if(s_res == -1)
+        return false;
+    if(!S_ISREG(f_stats.st_mode))
+        return false;
+#endif // LINUX
     bool is_unicode = false;
 
     // open in binary mode (for unicode)
@@ -52,10 +60,10 @@ bool CIniFile::ReadIniFile(const char* file, bool append)
         is_unicode = true;
     else
         fseek(inifile, 0, SEEK_SET);
-    
+
     if(!append)
         ClearData();
-    
+
     genstr line;
     genstr cur_section;
     genstr::size_type f, f2;
@@ -81,7 +89,7 @@ bool CIniFile::ReadIniFile(const char* file, bool append)
             genstr key = RemoveSpaces(line.substr(0, f), true, true);
             if((f2 = key.find(_T(";"))) != genstr::npos)
                 continue;
-            
+
             genstr value = line.substr(f + 1);
             // check for comment
             if ((f = value.find(_T(";"))) != genstr::npos) {
@@ -126,13 +134,13 @@ genstr CIniFile::GetNextLine(FILE* file, bool is_unicode)
     size_t l = _tcslen(str) - 1;
     if(str[0] == '\n' || str[0] == '\r')
         return _T("");
-    
+
     if(str[l] == '\n' || str[l] == '\r')
         str[l] = '\0';
-    
+
     if(str[l-1] == '\n' || str[l-1] == '\r')
         str[l-1] = '\0';
-    
+
     return genstr(str);
 }
 
@@ -153,7 +161,7 @@ bool CIniFile::GetStr(genstr& val, genstr strSection, genstr strKey)
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -193,7 +201,7 @@ bool CIniFile::WriteIniFile(const char* file, bool write_unicode)
         }
         filedata += _T("\n");
     }
-    
+
     // write into file
     FILE* f = fopen(file, "wb");
     if(!f)
@@ -205,7 +213,7 @@ bool CIniFile::WriteIniFile(const char* file, bool write_unicode)
         // write unicode ident
         unsigned char uc[] = {0xFF, 0xFE};
         fwrite(uc, 2, 1, f);
-        
+
         wchar_t* str = new wchar_t[length + 1];
 #ifdef UNICODE
         wcsncpy(str, filedata.c_str(), length);
@@ -221,7 +229,7 @@ bool CIniFile::WriteIniFile(const char* file, bool write_unicode)
 #ifdef UNICODE
         wcstombs(str, filedata.c_str(), length);
 #else
-        strncpy(str, filedata.c_str(), length);        
+        strncpy(str, filedata.c_str(), length);
 #endif
         str[length] = '\0';
         fwrite(str, sizeof(char), length, f);
@@ -245,7 +253,7 @@ void CIniFile::SetLong(long val, genstr strSection, genstr strKey)
 {
     char longStr[64];
     sprintf(longStr, "%d", val);
-    
+
     TCHAR str[64];
     // convert into unicode
 #ifdef UNICODE
@@ -288,9 +296,11 @@ genstr CIniFile::ChgCase(genstr str, bool to_upper)
     for(genstr::size_type i = 0; i < l; i++)
     {
         if(to_upper)
-            str[i] = _toupper(str[i]);
+        {
+            str[i] = (str[i] > 'a' && str[i] < 'z') ? str[i] - 0x20 : str[i];
+        }
         else
-            str[i] = _tolower(str[i]);
+            str[i] = (str[i] > 'A' && str[i] < 'Z') ? str[i] + 0x20 : str[i];
     }
     return str;
 }

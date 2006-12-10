@@ -45,7 +45,7 @@ void CSpeedKernel::SetDefRebuildFactor(float RebuildFac) {
 void CSpeedKernel::ResetWaveState()
 {
     // ToDo
-    SetTargetInfo(m_LastTarget, 0);
+    SetTargetInfo(m_DefenderInfos[0], 0, true);
 	/*m_Waves.TotalPlunder = m_Result.GesamtBeute = Res();
 	m_Waves.NumAtts = m_Result.NumAtts = 0;
     m_Waves.TotalRecs = m_Result.GesamtRecs = 0;*/
@@ -121,14 +121,19 @@ void CSpeedKernel::SetRF(RFTYPE ver)
     FillRFTable(ver);
 }
 
-void CSpeedKernel::SetTargetInfo(TargetInfo TI, int FleetID)
+void CSpeedKernel::SetTargetInfo(TargetInfo TI, int FleetID, bool ResetWavesState /* = true*/)
 {
+    if(FleetID > MAX_PLAYERS_PER_TEAM)
+        return;
     size_t i;
     vector<SItem> items = TI.Fleet;
     // merge fleets
-    for(i = 0; i < TI.Defence.size(); i++)
+    if(FleetID == 0)
     {
-        items.push_back(TI.Defence[i]);
+        for(i = 0; i < TI.Defence.size(); i++)
+        {
+            items.push_back(TI.Defence[i]);
+        }
     }
     
     // if there where no fleet unit, add "dummy unit" to delete defender
@@ -146,25 +151,31 @@ void CSpeedKernel::SetTargetInfo(TargetInfo TI, int FleetID)
     }
     // update kernel data
     SetFleet(NULL, &items);
-    m_LastTarget = TI;
-    m_NumShipsDef = items;
+    SetTechs(NULL, &TI.Techs, FleetID);
+    m_DefenderInfos[FleetID] = TI;
+    
     m_TechsDef[FleetID] = TI.Techs;
     
-    // reset wave state
-    m_Waves.TotalPlunder = m_Result.GesamtBeute = Res();
-	m_Waves.NumAtts = m_Result.NumAtts = 0;
-    m_Waves.TotalRecs = m_Result.GesamtRecs = 0;
-    m_Waves.TotalDebris = m_Result.GesTF = Res();
-    m_Waves.TotalLosses = m_Result.GesVerlust = Res();
+    if(ResetWavesState)
+    {
+        // reset wave state
+        m_Waves.TotalPlunder = m_Result.GesamtBeute = Res();
+        m_Waves.NumAtts = m_Result.NumAtts = 0;
+        m_Waves.TotalRecs = m_Result.GesamtRecs = 0;
+        m_Waves.TotalDebris = m_Result.GesTF = Res();
+        m_Waves.TotalLosses = m_Result.GesVerlust = Res();
 
-    _tcsncpy(m_Result.PlaniName, TI.Name, 63);
-    m_Result.Position = TI.Pos;
-    m_Result.RessDa = TI.Resources;
+        _tcsncpy(m_Result.PlaniName, TI.Name, 63);
+        m_Result.Position = TI.Pos;
+        m_Result.RessDa = TI.Resources;
+    }
 }
 
-TargetInfo CSpeedKernel::GetTargetInfo()
+TargetInfo CSpeedKernel::GetTargetInfo(int FleetID)
 {
-    return m_LastTarget;
+    if (FleetID >= MAX_PLAYERS_PER_TEAM)
+        return TargetInfo();
+    return m_DefenderInfos[FleetID];
 }
 
 void CSpeedKernel::SetCSSFiles(TCHAR* cr_css, TCHAR* bwc_css)
