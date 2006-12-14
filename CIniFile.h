@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2006 Maximialian Matthï¿½& Nicolas Hï¿½t
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #undef _tcslen
 #undef _tcstol
 
-#define UNICODE
+//#define UNICODE
 #ifdef UNICODE
 typedef wchar_t TCHAR;
 #define _T(x) L ## x
