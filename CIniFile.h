@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthï¿½& Nicolas Hï¿½t
+Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #undef _tcslen
 #undef _tcstol
 
-//#define UNICODE
+#define UNICODE
 #ifdef UNICODE
 typedef wchar_t TCHAR;
 #define _T(x) L ## x
@@ -72,11 +72,11 @@ class CINIFILE_API CIniFile
 {
 public:
     CIniFile();
-    CIniFile(const char* file, bool remove_leading_spaces = false, bool remove_trailing_spaces = true);
+    CIniFile(const char* file, bool remove_leading_spaces = false, bool remove_trailing_spaces = true, bool overwrite_existing = true);
     ~CIniFile();
 
     // reads out all keys from a file
-    bool ReadIniFile(const char* file, bool append = false);
+    bool ReadIniFile(const char* file, bool append = false, bool overwrite_existing = true);
     // writes current ini data into file
     bool WriteIniFile(const char* file, bool write_unicode = false);
 
@@ -85,8 +85,8 @@ public:
     bool RemoveKey(genstr strSection, genstr strKey);
     bool RemoveSection(genstr strSection);
 
-    void SetStr(genstr val, genstr strSection, genstr strKey);
-    void SetLong(long val, genstr strSection, genstr strKey);
+    void SetStr(genstr val, genstr strSection, genstr strKey, bool overwrite_existing = true);
+    void SetLong(long val, genstr strSection, genstr strKey, bool overwrite_existing = true);
 
     void SetRemoveSpaces(bool remove_leading, bool remove_trailing);
 

@@ -30,14 +30,14 @@ CIniFile::~CIniFile()
 {
 }
 
-CIniFile::CIniFile(const char* file, bool remove_leading_spaces, bool remove_trailing_spaces)
+CIniFile::CIniFile(const char* file, bool remove_leading_spaces, bool remove_trailing_spaces, bool overwrite_existing /*= true*/)
 {
     m_DelFirstSpaces = remove_leading_spaces;
     m_DelLastSpaces = remove_trailing_spaces;
-    ReadIniFile(file);
+    ReadIniFile(file, false, overwrite_existing);
 }
 
-bool CIniFile::ReadIniFile(const char* file, bool append)
+bool CIniFile::ReadIniFile(const char* file, bool append, bool overwrite_existing /*= true*/)
 {
 #ifdef LINUX
     stat f_stats;
@@ -86,7 +86,7 @@ bool CIniFile::ReadIniFile(const char* file, bool append)
         else if((f = line.find(_T("="))) != genstr::npos)
         {
             // get key and value
-            genstr key = RemoveSpaces(line.substr(0, f), true, true);
+            genstr key = RemoveSpaces(line.substr(0, f), m_DelFirstSpaces, m_DelFirstSpaces);
             if((f2 = key.find(_T(";"))) != genstr::npos)
                 continue;
 
@@ -95,7 +95,7 @@ bool CIniFile::ReadIniFile(const char* file, bool append)
             if ((f = value.find(_T(";"))) != genstr::npos) {
                 value.erase(f);
             }
-            SetStr(value, cur_section, key);
+            SetStr(value, cur_section, key, overwrite_existing);
         }
     }
 
@@ -240,8 +240,14 @@ bool CIniFile::WriteIniFile(const char* file, bool write_unicode)
 }
 
 
-void CIniFile::SetStr(genstr val, genstr strSection, genstr strKey)
+void CIniFile::SetStr(genstr val, genstr strSection, genstr strKey, bool overwrite_existing /*= true*/)
 {
+    if(!overwrite_existing)
+    {
+        genstr tmp;
+        if(GetStr(tmp, strSection, strKey))
+            return;
+    }
     m_mRealSecNames[ChgCase(strSection, false)] = strSection;
     strSection = ChgCase(strSection, false);
     m_mRealKeyNames[ChgCase(strKey, false)] = strKey;
@@ -249,7 +255,7 @@ void CIniFile::SetStr(genstr val, genstr strSection, genstr strKey)
     m_mIniData[strSection][strKey] = val;
 }
 
-void CIniFile::SetLong(long val, genstr strSection, genstr strKey)
+void CIniFile::SetLong(long val, genstr strSection, genstr strKey, bool overwrite_existing /*= true*/)
 {
     char longStr[64];
     sprintf(longStr, "%d", val);
@@ -261,7 +267,7 @@ void CIniFile::SetLong(long val, genstr strSection, genstr strKey)
 #else
     strncpy(str, longStr, 63);
 #endif
-    SetStr(str, strSection, strKey);
+    SetStr(str, strSection, strKey, overwrite_existing);
 }
 
 genstr CIniFile::RemoveSpaces(genstr str, bool remove_first, bool remove_last)
@@ -276,10 +282,9 @@ genstr CIniFile::RemoveSpaces(genstr str, bool remove_first, bool remove_last)
     if(remove_last)
     {
         int i = str.length();
-        while(str[i] == ' ')
+        while(str[i - 1] == ' ')
             i--;
         str.erase(i);
-
     }
     return str;
 }
