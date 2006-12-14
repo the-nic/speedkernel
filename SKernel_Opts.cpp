@@ -51,19 +51,19 @@ void CSpeedKernel::ResetWaveState()
     m_Waves.TotalRecs = m_Result.GesamtRecs = 0;*/
 }
 
-void CSpeedKernel::SetCallBack(void (*f)(int sim, int round)) { 
+void CSpeedKernel::SetCallBack(void (*f)(int sim, int round)) {
     m_FuncPtr = f;
 }
 
-void CSpeedKernel::SetDefInDebris(bool really) { 
+void CSpeedKernel::SetDefInDebris(bool really) {
     m_DefInTF = really;
 }
 
-void CSpeedKernel::SetComputeBestWorstCase(bool how) { 
+void CSpeedKernel::SetComputeBestWorstCase(bool how) {
     m_CompBestWorstCase = how;
 }
 
-void CSpeedKernel::SetOwnPosition(const PlaniPos& p, int FleetID) { 
+void CSpeedKernel::SetOwnPosition(const PlaniPos& p, int FleetID) {
     if(FleetID >= 0 && FleetID <= MAX_PLAYERS_PER_TEAM)
         m_OwnPos[FleetID] = p;
 }
@@ -73,7 +73,7 @@ void CSpeedKernel::GetOwnPosition(PlaniPos& p, int FleetID) {
         p = m_OwnPos[FleetID];
 }
 
-void CSpeedKernel::SetSpeed(int perc_speed, int v, int i, int h, int FleetID) { 
+void CSpeedKernel::SetSpeed(int perc_speed, int v, int i, int h, int FleetID) {
     m_Speed[FleetID] = perc_speed / 10;
     m_TechsTW[FleetID][0] = v;
     m_TechsTW[FleetID][1] = i;
@@ -135,7 +135,7 @@ void CSpeedKernel::SetTargetInfo(TargetInfo TI, int FleetID, bool ResetWavesStat
             items.push_back(TI.Defence[i]);
         }
     }
-    
+
     // if there where no fleet unit, add "dummy unit" to delete defender
     if(items.size() == 0)
     {
@@ -153,9 +153,9 @@ void CSpeedKernel::SetTargetInfo(TargetInfo TI, int FleetID, bool ResetWavesStat
     SetFleet(NULL, &items);
     SetTechs(NULL, &TI.Techs, FleetID);
     m_DefenderInfos[FleetID] = TI;
-    
+
     m_TechsDef[FleetID] = TI.Techs;
-    
+
     if(ResetWavesState)
     {
         // reset wave state

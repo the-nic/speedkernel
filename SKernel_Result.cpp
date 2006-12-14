@@ -120,42 +120,54 @@ bool CSpeedKernel::GetFleetAfterSim(vector<SItem>* Attacker, vector<SItem>* Defe
 bool CSpeedKernel::GetSetFleet(SItem* Attacker, SItem* Defender, int FleetID)
 {
     size_t i;
-    DWORD Num = 0;
-    if(Attacker && m_NumSetShipsAtt.size()) {
-        for(i = 0; i < T_END; i++) {
-            Attacker[i].Type = T_NONE;
-            Attacker[i].OwnerID = FleetID;
-        }
-        for(i = 0; i < m_NumSetShipsAtt.size() && Num < T_END; i++)
-	    {
-            if(m_NumSetShipsAtt[i].OwnerID == FleetID )
-		        Attacker[Num++] = m_NumSetShipsAtt[i];
-        }
-	}
-    else if(Attacker) {
-        for(i = 0; i < T_END; i++) {
-            Attacker[i].Type = T_NONE;
+    int Num = 0;
+
+    // prepare array
+    if(Attacker)
+    {
+        for(i = 0; i < T_END; i++)
+        {
+            Attacker[i].Type = (ITEM_TYPE)i;
+            Attacker[i].Num = 0;
             Attacker[i].OwnerID = FleetID;
         }
     }
+    if(Attacker && m_NumSetShipsAtt.size())
+    {
+        for(i = 0; i < m_NumSetShipsAtt.size() && Num < T_END; i++)
+	    {
+            if(m_NumSetShipsAtt[i].OwnerID == FleetID)
+            {
+                ITEM_TYPE type = m_NumSetShipsAtt[i].Type;
+		        Attacker[type] = m_NumSetShipsAtt[i];
+		        Num++;
+            }
+        }
+	}
+
     Num = 0;
-    if(Defender && m_NumSetShipsDef.size()) {
-        for(i = 0; i < T_END; i++) {
-            Defender[i].Type = T_NONE;
+    if(Defender)
+    {
+        for(i = 0; i < T_END; i++)
+        {
+            Defender[i].Type = (ITEM_TYPE)i;
+            Defender[i].Num = 0;
             Defender[i].OwnerID = FleetID;
         }
+    }
+    if(Defender && m_NumSetShipsDef.size())
+    {
         for(i = 0; i < m_NumSetShipsDef.size() && Num < T_END; i++)
 	    {
             if(m_NumSetShipsDef[i].OwnerID == FleetID)
-		        Defender[Num++] = m_NumSetShipsDef[i];
+            {
+                ITEM_TYPE type = m_NumSetShipsDef[i].Type;
+		        Defender[type] = m_NumSetShipsDef[i];
+		        Num++;
+            }
         }
     }
-    else if(Defender) {
-        for(i = 0; i < T_END; i++) {
-            Defender[i].Type = T_NONE;
-            Defender[i].OwnerID = FleetID;
-        }
-    }
+
 	return true;
 }
 
@@ -222,7 +234,7 @@ string CSpeedKernel::GenerateCR()
 #ifdef UNICODE
         utf8::utf16to8(tmp.begin(), tmp.end(), back_inserter(utf8_str));
 #else
-        utf8_str = out;
+        utf8_str = out.str();
 #endif
         return utf8_str;
     }
@@ -425,7 +437,7 @@ string CSpeedKernel::GenerateCR()
 #ifdef UNICODE
     utf8::utf16to8(tmp.begin(), tmp.end(), back_inserter(utf8_str));
 #else
-    utf8_str = out;
+    utf8_str = out.str();
 #endif
     return utf8_str;
 }
@@ -433,7 +445,7 @@ string CSpeedKernel::GenerateCR()
 void CSpeedKernel::GenerateCRTable(genstrstream &out, const vector<SItem> &Items, int Team, int Player, TCHAR* Title) {
     size_t k;
     TCHAR c[1024];
-out << (Team == ATTER ? m_Attacker : m_Defender) << Title << _T("\n");
+    out << (Team == ATTER ? m_Attacker : m_Defender) << Title << _T("\n");
     if(Player != -1) {
         ShipTechs techs = (Team == ATTER ? m_TechsAtt[Player] : m_TechsDef[Player]);
         out << m_KBTechs[0] << _T(":+") << techs.Weapon * 10 << _T("%&nbsp;") << m_KBTechs[1]
@@ -1082,7 +1094,7 @@ string CSpeedKernel::GenerateBWC()
 #ifdef UNICODE
     utf8::utf16to8(tmp2.begin(), tmp2.end(), back_inserter(utf8_str));
 #else
-    utf8_str = out;
+    utf8_str = out.str();
 #endif
     return utf8_str;
 }
