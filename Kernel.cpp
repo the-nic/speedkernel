@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -30,7 +30,6 @@ BOOL APIENTRY DllMain( HANDLE hModule,
     switch (ul_reason_for_call)
 	{
 		case DLL_PROCESS_ATTACH:
-            // verhindert mehrmaliges aufrufen von DLL_PROCESS_ATTACH
             DisableThreadLibraryCalls((HINSTANCE)hModule);
 		case DLL_THREAD_ATTACH:
 		case DLL_THREAD_DETACH:

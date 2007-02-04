@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -47,19 +47,29 @@ bool CIniFile::ReadIniFile(const char* file, bool append, bool overwrite_existin
     if(!S_ISREG(f_stats.st_mode))
         return false;
 #endif // LINUX
-    bool is_unicode = false;
 
     // open in binary mode (for unicode)
     FILE* inifile = fopen(file, "rb");
     if(!inifile)
         return false;
     // check if unicode file and if not, switch back to non-unicode mode
-    unsigned char uc[2];
-    fread(uc, 2, 1, inifile);
+    unsigned char uc[4];
+    fread(uc, 4, 1, inifile);
     if(uc[0] == 0xFF && uc[1] == 0xFE)
-        is_unicode = true;
+    {
+        m_FileFormat = F_UTF16LE;
+        fseek(inifile, 2, SEEK_SET);
+    }
+    else if(uc[0] == 0xEF && uc[1] == 0xBB  && uc[2] == 0xBF)
+    {
+        m_FileFormat = F_UTF8;
+        fseek(inifile, 3, SEEK_SET);
+    }
     else
+    {
+        m_FileFormat = F_ANSI;
         fseek(inifile, 0, SEEK_SET);
+    }
 
     if(!append)
         ClearData();
@@ -69,7 +79,7 @@ bool CIniFile::ReadIniFile(const char* file, bool append, bool overwrite_existin
     genstr::size_type f, f2;
     while(!feof(inifile))
     {
-        line = GetNextLine(inifile, is_unicode);
+        line = GetNextLine(inifile);
         f = line.find_first_not_of(_T(" "));
         if(f == genstr::npos)
             continue;
@@ -86,7 +96,7 @@ bool CIniFile::ReadIniFile(const char* file, bool append, bool overwrite_existin
         else if((f = line.find(_T("="))) != genstr::npos)
         {
             // get key and value
-            genstr key = RemoveSpaces(line.substr(0, f), m_DelFirstSpaces, m_DelFirstSpaces);
+            genstr key = RemoveSpaces(line.substr(0, f), m_DelFirstSpaces, m_DelLastSpaces);
             if((f2 = key.find(_T(";"))) != genstr::npos)
                 continue;
 
@@ -102,11 +112,12 @@ bool CIniFile::ReadIniFile(const char* file, bool append, bool overwrite_existin
     return true;
 }
 
-genstr CIniFile::GetNextLine(FILE* file, bool is_unicode)
+genstr CIniFile::GetNextLine(FILE* file)
 {
     TCHAR str[512];
     // convert data if needed
-    if(!is_unicode) {
+    if(m_FileFormat == F_ANSI)
+    {
         char c[512];
         fgets(c, 512, file);
 #ifdef UNICODE
@@ -115,13 +126,26 @@ genstr CIniFile::GetNextLine(FILE* file, bool is_unicode)
         strncpy(str, c, 512);
 #endif
     }
-    else {
+    else if(m_FileFormat == F_UTF16LE)
+    {
         wchar_t c[512];
         fgetws(c, 512, file);
 #ifdef UNICODE
         wcsncpy(str, c, 512);
 #else
         wcstombs(str, c, 512);
+#endif
+    }
+    else if(m_FileFormat == F_UTF8)
+    {
+        char c[512];
+        fgets(c, 512, file);
+        string s(c);
+        wstring ws = UTF8ToWString(s);
+#ifdef UNICODE
+        wcsncpy(str, ws.c_str(), 512);
+#else
+        wcstombs(str, ws.c_str(), 512);
 #endif
     }
 
@@ -344,4 +368,34 @@ bool CIniFile::RemoveSection(genstr strSection)
         return true;
     }
     return false;
+}
+
+string CIniFile::WStringToUTF8(wstring str)
+{
+    string utf8str;
+    vector<char> utf8chars;
+    if(sizeof(wchar_t) == 2)
+        utf8::utf16to8(str.begin(), str.end(), back_inserter(utf8chars));
+    else if(sizeof(wchar_t) == 4)
+        utf8::utf32to8(str.begin(), str.end(), back_inserter(utf8chars));
+    for (size_t i = 0; i < utf8chars.size(); i++)
+    {
+        utf8str += utf8chars[i];
+    }
+    return utf8str;
+}
+
+wstring CIniFile::UTF8ToWString(string str)
+{
+    wstring wstr;
+    vector<wchar_t> wchars;
+    if(sizeof(wchar_t) == 2)
+        utf8::utf8to16(str.begin(), str.end(), back_inserter(wchars));
+    else if(sizeof(wchar_t) == 4)
+        utf8::utf8to32(str.begin(), str.end(), back_inserter(wchars));
+    for (size_t i = 0; i < wchars.size(); i++)
+    {
+        wstr += wchars[i];
+    }
+    return wstr;
 }

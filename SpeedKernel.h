@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -72,6 +72,9 @@ public:
 
     //! reset all options / SpeedSimData
     void Reset();
+
+    //! returns the current simulation number while simulating, otherwise 0
+    int GetCurrentSim();
 
     //! simulates an ip missiles attack
     IPMBattleResult SimulateIPM(int NumIPM, int NumABM, int FleetID, ITEM_TYPE PrimaryItem = T_RAK);
@@ -453,6 +456,7 @@ private:
 #endif
 
 	int m_CurrentRound;
+    int m_CurrentSim;
 
 	vector<Obj>* m_AttObj, *m_DefObj;
     int m_NumPlayersPerTeam[2];
@@ -534,7 +538,8 @@ private:
 	PlaniPos m_OwnPos[MAX_PLAYERS_PER_TEAM];
 
     TargetInfo m_DefenderInfos[MAX_PLAYERS_PER_TEAM];
-    //TargetInfo m_LastTarget;
+    // needed for waves
+    TargetInfo m_LastReadTarget;
 
 	ShipTechs m_TechsAtt[MAX_PLAYERS_PER_TEAM];
 	ShipTechs m_TechsDef[MAX_PLAYERS_PER_TEAM];
@@ -567,5 +572,7 @@ private:
 
 void CheckVector(const vector<SItem>& v);
 void CheckVector(const vector<Obj>& v);
+
+string wchar_to_utf8(wstring str);
 
 #endif

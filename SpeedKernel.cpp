@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,11 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #pragma warning(disable: 4251)
 #include "SpeedKernel.h"
 
-/*
-ToDo:
-    - Vorschlag: Bilanz in Metalleinheiten
-    - dispersion of destroyed units with probability
-*/
 
 CSpeedKernel& CSpeedKernel::GetInstance()
 {
@@ -53,7 +48,8 @@ CSpeedKernel::CSpeedKernel()
 	m_Result.GesamtBeute = Res();
 	m_Result.NumAtts = 0;
     m_Result.GesamtRecs = 0;
-    memset(m_Speed, 0, MAX_PLAYERS_PER_TEAM * sizeof(m_Speed));
+    for(r = 0; r < MAX_PLAYERS_PER_TEAM; r++)
+        m_Speed[r] = 10;
 
 	m_NumShipsAtt.resize(T_END);
 	m_NumShipsDef.resize(T_END);
@@ -88,6 +84,7 @@ CSpeedKernel::CSpeedKernel()
     m_NumPlayersPerTeam[ATTER] = 0;
     m_NumPlayersPerTeam[DEFFER] = 0;
     m_BracketNames = false;
+    m_CurrentSim = 0;
 
     for(r = 0; r < T_SHIPEND; r++) {
         for(int i = 0; i < T_END; i++) {
@@ -96,7 +93,7 @@ CSpeedKernel::CSpeedKernel()
     }
 
     ComputeShipData();
-    
+
     // profiler functions
     PR_ADD_FUNC(F_ADDPTONUMBER, N_ADDPTONUMBER);
     PR_ADD_FUNC(F_CSA_058, N_CSA_058);
@@ -126,6 +123,7 @@ CSpeedKernel::CSpeedKernel()
     m_IniFleetNames[T_SAT] = _T("SOL");
     m_IniFleetNames[T_ZER] = _T("DEST");
     m_IniFleetNames[T_TS] = _T("RIP");
+    m_IniFleetNames[T_IC] = _T("IC");
     m_IniFleetNames[T_RAK] = _T("MISS");
     m_IniFleetNames[T_LL] = _T("S_LAS");
     m_IniFleetNames[T_SL] = _T("H_LAS");
@@ -138,7 +136,7 @@ CSpeedKernel::CSpeedKernel()
     m_BWC_CSS = _T("bwc.css");
     m_CR_CSS = _T("cr.css");
 
-	return; 
+	return;
 }
 
 CSpeedKernel::~CSpeedKernel()
@@ -150,7 +148,7 @@ CSpeedKernel::~CSpeedKernel()
 // returns version of kernel
 void CSpeedKernel::GetVersion(TCHAR* out)
 {
-	_tcscpy(out, KERNEL_VERSION); 
+	_tcscpy(out, KERNEL_VERSION);
 }
 
 
@@ -165,7 +163,8 @@ void CSpeedKernel::Reset()
 	m_DefObj->clear();
 	m_DefInTF = false;
     m_FuncPtr = NULL;
-    memset(m_Speed, 0, MAX_PLAYERS_PER_TEAM * sizeof(m_Speed));
+    for(int r = 0; r < MAX_PLAYERS_PER_TEAM; r++)
+        m_Speed[r] = 10;
     memset(m_OwnPos, 0, MAX_PLAYERS_PER_TEAM * sizeof(PlaniPos));
 	memset(m_TechsAtt, 0, MAX_PLAYERS_PER_TEAM * sizeof(ShipTechs));
 	memset(m_TechsDef, 0, MAX_PLAYERS_PER_TEAM * sizeof(ShipTechs));
@@ -185,7 +184,7 @@ void CheckVector(const vector<SItem>& v)
 	size_t s = v.size();
 	for(size_t i = 0; i < v.size(); i++)
 		items[i] = v[i];
-	
+
 	return;
 }
 
@@ -195,7 +194,7 @@ void CheckVector(const vector<Obj>& v)
 	size_t s = v.size();
 	for(size_t i = 0; i < v.size(); i++)
 		items[i] = v[i];
-	
+
 	return;
 }
 
@@ -234,4 +233,19 @@ int _stprintf(TCHAR * target, const TCHAR * format, ...)
 #endif
     va_end(arglist);
     return i;
+}
+
+string wchar_to_utf8(wstring str)
+{
+    string utf8str;
+    vector<char> utf8chars;
+    if(sizeof(wchar_t) == 2)
+        utf8::utf16to8(str.begin(), str.end(), back_inserter(utf8chars));
+    else if(sizeof(wchar_t) == 4)
+        utf8::utf32to8(str.begin(), str.end(), back_inserter(utf8chars));
+    for (size_t i = 0; i < utf8chars.size(); i++)
+    {
+        utf8str += utf8chars[i];
+    }
+    return utf8str;
 }

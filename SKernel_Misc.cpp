@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -161,7 +161,7 @@ void CSpeedKernel::ComputeShipData()
         Kosten[T_LJ] = Res(3000, 1000);
         Kosten[T_SJ] = Res(6000, 4000);
         Kosten[T_KREUZER] = Res(20000, 7000, 2000);
-        Kosten[T_SS] = Res(40000, 20000);
+        Kosten[T_SS] = Res(45000, 15000);
         Kosten[T_KOLO] = Res(10000, 20000, 10000);
         Kosten[T_REC] = Res(10000, 6000, 2000);
         Kosten[T_SPIO] = Res(0, 1000);
@@ -169,6 +169,7 @@ void CSpeedKernel::ComputeShipData()
         Kosten[T_SAT] = Res(0, 2000, 500);
         Kosten[T_ZER] = Res(60000, 50000, 15000);
         Kosten[T_TS] = Res(5000000, 4000000, 1000000);
+        Kosten[T_IC] = Res(30000, 40000, 15000);
         Kosten[T_RAK] = Res(2000, 0);
         Kosten[T_LL] = Res(1500, 500);
         Kosten[T_SL] = Res(6000, 2000);
@@ -191,6 +192,7 @@ void CSpeedKernel::ComputeShipData()
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_SAT] = 1;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_ZER] = 500;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_TS] = 50000;
+        MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_IC] = 400;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_RAK] = 20;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_LL] = 25;
         MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][T_SL] = 100;
@@ -213,6 +215,7 @@ void CSpeedKernel::ComputeShipData()
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_SAT] = 1;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_ZER] = 2000;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_TS] = 200000;
+        Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_IC] = 700;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_RAK] = 80;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_LL] = 100;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_SL] = 250;
@@ -228,25 +231,6 @@ void CSpeedKernel::ComputeShipData()
     {
         MaxLifes[MAX_PLAYERS_PER_TEAM][ATTER][i] = (Kosten[i].kris + Kosten[i].met) / 10.0f;
     }
-	for(i = 0; i < T_END; i++)
-	{
-		LadeKaps[i] = 0;
-		Verbrauch[i] = 0;
-	}
-
-	LadeKaps[T_KT] = 5000;
-	LadeKaps[T_GT] = 25000;
-	LadeKaps[T_LJ] = 50;
-	LadeKaps[T_SJ] = 100;
-	LadeKaps[T_KREUZER] = 800;
-	LadeKaps[T_SS] = 1500;
-	LadeKaps[T_KOLO] = 7500;
-	LadeKaps[T_REC] = 20000;
-	// changed since OGame 0.74a
-    LadeKaps[T_SPIO] = 0;
-	LadeKaps[T_BOMBER] = 500;
-	LadeKaps[T_ZER] = 2000;
-	LadeKaps[T_TS] = 1000000;
 
     for(DWORD ID = 0; ID < MAX_PLAYERS_PER_TEAM; ID++)
     {
@@ -278,7 +262,31 @@ void CSpeedKernel::ComputeShipData()
             Dams[ID][ATTER][i] *= DamFak_a;
         }
     }
-    if(!m_ShipDataFromFile) {
+    if(!m_ShipDataFromFile)
+    {
+        for(i = 0; i < T_END; i++)
+	    {
+		    LadeKaps[i] = 0;
+		    Verbrauch[i] = 0;
+            BaseSpeed[i] = 0;
+	    }
+        // ship capacity
+        LadeKaps[T_KT] = 5000;
+	    LadeKaps[T_GT] = 25000;
+	    LadeKaps[T_LJ] = 50;
+	    LadeKaps[T_SJ] = 100;
+	    LadeKaps[T_KREUZER] = 800;
+	    LadeKaps[T_SS] = 1500;
+	    LadeKaps[T_KOLO] = 7500;
+	    LadeKaps[T_REC] = 20000;
+	    // changed since OGame 0.74a
+        LadeKaps[T_SPIO] = 0;
+	    LadeKaps[T_BOMBER] = 500;
+	    LadeKaps[T_ZER] = 2000;
+	    LadeKaps[T_TS] = 1000000;
+        LadeKaps[T_IC] = 750;
+
+        // consumption
         Verbrauch[T_KT] = 10;
         Verbrauch[T_GT] = 50;
         Verbrauch[T_LJ] = 20;
@@ -291,6 +299,22 @@ void CSpeedKernel::ComputeShipData()
         Verbrauch[T_BOMBER] = 1000;
         Verbrauch[T_ZER] = 1000;
         Verbrauch[T_TS] = 1;
+        Verbrauch[T_IC] = 250;
+
+        // speed
+        BaseSpeed[T_KT] = 5000;
+        BaseSpeed[T_GT] = 7500;
+        BaseSpeed[T_LJ] = 12500;
+        BaseSpeed[T_SJ] = 10000;
+        BaseSpeed[T_KREUZER] = 15000;
+        BaseSpeed[T_SS] = 10000;
+        BaseSpeed[T_KOLO] = 2500;
+        BaseSpeed[T_REC] = 2000;
+        BaseSpeed[T_SPIO] = 100000000;
+        BaseSpeed[T_BOMBER] = 4000;
+        BaseSpeed[T_ZER] = 5000;
+        BaseSpeed[T_TS] = 100;
+        BaseSpeed[T_IC] = 10000;
     }
 
     Triebwerke[T_KT] = TW_VERBRENNUNG;
@@ -305,20 +329,7 @@ void CSpeedKernel::ComputeShipData()
     Triebwerke[T_BOMBER] = TW_IMPULS;
     Triebwerke[T_ZER] = TW_HYPERRAUM;
     Triebwerke[T_TS] = TW_HYPERRAUM;
-
-    // speed
-    BaseSpeed[T_KT] = 5000;
-    BaseSpeed[T_GT] = 7500;
-    BaseSpeed[T_LJ] = 12500;
-    BaseSpeed[T_SJ] = 10000;
-    BaseSpeed[T_KREUZER] = 15000;
-    BaseSpeed[T_SS] = 10000;
-    BaseSpeed[T_KOLO] = 2500;
-    BaseSpeed[T_REC] = 2000;
-    BaseSpeed[T_SPIO] = 100000000;
-    BaseSpeed[T_BOMBER] = 4000;
-    BaseSpeed[T_ZER] = 5000;
-    BaseSpeed[T_TS] = 100;
+    Triebwerke[T_IC] = TW_HYPERRAUM;
 }
 
 // inits random number generator
@@ -562,9 +573,9 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
     if(!langfile) {
         // init german strings
         m_FleetNames[T_KT] = _T("Kleiner Transporter");
-        m_FleetNames[T_GT] = _T("Großer Transporter");
-        m_FleetNames[T_LJ] = _T("Leichter Jäger");
-        m_FleetNames[T_SJ] = _T("Schwerer Jäger");
+        m_FleetNames[T_GT] = _T("Gro\xDF")_T("er Transporter");
+        m_FleetNames[T_LJ] = _T("Leichter J\xE4ger");
+        m_FleetNames[T_SJ] = _T("Schwerer J\xE4ger");
         m_FleetNames[T_KREUZER] = _T("Kreuzer");
         m_FleetNames[T_SS] = _T("Schlachtschiff");
         m_FleetNames[T_SPIO] = _T("Spionagesonde");
@@ -572,16 +583,17 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_FleetNames[T_REC] = _T("Recycler");
         m_FleetNames[T_BOMBER] = _T("Bomber");
         m_FleetNames[T_SAT] = _T("Solar Satellit");
-        m_FleetNames[T_ZER] = _T("Zerstörer");
+        m_FleetNames[T_ZER] = _T("Zerst\xF6rer");
         m_FleetNames[T_TS] = _T("Todesstern");
+        m_FleetNames[T_IC] = _T("Schlachtkreuzer");
         m_FleetNames[T_RAK] = _T("Raketenwerfer");
-        m_FleetNames[T_LL] = _T("Leichtes Lasergeschütz");
-        m_FleetNames[T_SL] = _T("Schweres Lasergeschütz");
-        m_FleetNames[T_IONEN] = _T("Ionengeschütz");
-        m_FleetNames[T_GAUSS] = _T("Gaußkanone");
+        m_FleetNames[T_LL] = _T("Leichtes Lasergesch\xFCtz");
+        m_FleetNames[T_SL] = _T("Schweres Lasergesch\xFCtz");
+        m_FleetNames[T_IONEN] = _T("Ionengesch\xFCtz");
+        m_FleetNames[T_GAUSS] = _T("Gau\xDF")_T("kanone");
         m_FleetNames[T_PLASMA] = _T("Plasmawerfer");
         m_FleetNames[T_KS] = _T("Kleine Schildkuppel");
-        m_FleetNames[T_GS] = _T("Große Schildkuppel");
+        m_FleetNames[T_GS] = _T("Gro\xDF")_T("e Schildkuppel");
         m_FleetNames[T_END] = _T("Abfangrakete");
         m_FleetNames[T_END + 1] = _T("Unbekannt");
         m_altFleetNames[T_GT] = _T("Grosser Transporter");
@@ -596,8 +608,8 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_altFleetNames[T_GS] = _T("Grosse Schildkuppel");
         m_KBNames[T_KT] = _T("Kl.Trans");
         m_KBNames[T_GT] = _T("Gr.Trans");
-        m_KBNames[T_LJ] = _T("L.Jäger");
-        m_KBNames[T_SJ] = _T("S.Jäger");
+        m_KBNames[T_LJ] = _T("L.J\xE4ger");
+        m_KBNames[T_SJ] = _T("S.J\xE4ger");
         m_KBNames[T_KREUZER] = _T("Kreuzer");
         m_KBNames[T_SS] = _T("Schlachts.");
         m_KBNames[T_REC] = _T("Recy.");
@@ -607,11 +619,12 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_KBNames[T_SAT] = _T("Sol. Sat");
         m_KBNames[T_ZER] = _T("Zerst.");
         m_KBNames[T_TS] = _T("Rip");
+        m_KBNames[T_IC] = _T("S.Krz");
         m_KBNames[T_RAK] = _T("Rak.");
         m_KBNames[T_LL] = _T("L.Laser");
         m_KBNames[T_SL] = _T("S.Laser");
         m_KBNames[T_IONEN] = _T("Ion.W");
-        m_KBNames[T_GAUSS] = _T("Gauß");
+        m_KBNames[T_GAUSS] = _T("Gau\xDF");
         m_KBNames[T_PLASMA] = _T("Plasma");
         m_KBNames[T_KS] = _T("S.Kuppel");
         m_KBNames[T_GS] = _T("GS.Kuppel");
@@ -653,7 +666,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
 
         m_KBTechs[0] = _T("Waffen");
         m_KBTechs[1] = _T("Schilde");
-        m_KBTechs[2] = _T("Hülle");
+        m_KBTechs[2] = _T("H\xFClle");
         m_KBRoundStr[0] = _T("Die angreifende Flotte schie&szlig;t insgesamt %d mal mit Gesamtst&auml;rke %.0f auf den Verteidiger");
         m_KBRoundStr[1] = _T("Die Schilde des Verteidigers absorbieren %.0f Schadenspunkte");
         m_KBRoundStr[2] = _T("Die verteidigende Flotte schie&szlig;t insgesamt %d mal mit Gesamtst&auml;rke %.0f auf den Angreifer");
@@ -665,7 +678,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_KBResult[4] = _T("Das Ergebnis des Kampfes ist nicht exakt vorrauszusehen.");
         m_KBResult[5] = _T("Er erbeutet %d Metall, %d Kristall und %d Deuterium");
         m_KBResult[6] = _T("Der Angreifer gewinnt mit %.0f%% Wahrscheinlichkeit, der Verteidiger gewinnt zu %.0f%% Wahrscheinlichkeit.");
-        m_KBResult[7] = _T("Der Kampf mit geht mit %.0f%% Wahrscheinlichkeit unentschieden aus.");
+        m_KBResult[7] = _T("Der Kampf geht mit %.0f%% Wahrscheinlichkeit unentschieden aus.");
         m_KBResult[8] = _T("Vernichtet");
         m_KBLoss[0] = _T("Der Angreifer hat insgesamt %s Units + %s Deuterium verloren.");
         m_KBLoss[1] = _T("Der Verteidiger hat insgesamt %s Units + %s Deuterium verloren.");
@@ -720,6 +733,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
     iniFile.GetStr(m_FleetNames[T_SAT], _T("Fleet"), _T("SAT"));
     iniFile.GetStr(m_FleetNames[T_ZER], _T("Fleet"), _T("ZER"));
     iniFile.GetStr(m_FleetNames[T_TS], _T("Fleet"), _T("TS"));
+    iniFile.GetStr(m_FleetNames[T_IC], _T("Fleet"), _T("IC"));
     iniFile.GetStr(m_FleetNames[T_RAK], _T("Fleet"), _T("RAK"));
     iniFile.GetStr(m_FleetNames[T_LL], _T("Fleet"), _T("LL"));
     iniFile.GetStr(m_FleetNames[T_SL], _T("Fleet"), _T("SL"));
@@ -745,6 +759,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
     iniFile.GetStr(m_altFleetNames[T_SAT], _T("AltFleet"), _T("SAT2"));
     iniFile.GetStr(m_altFleetNames[T_ZER], _T("AltFleet"), _T("ZER2"));
     iniFile.GetStr(m_altFleetNames[T_TS], _T("AltFleet"), _T("TS2"));
+    iniFile.GetStr(m_altFleetNames[T_IC], _T("AltFleet"), _T("IC2"));
     iniFile.GetStr(m_altFleetNames[T_RAK], _T("AltFleet"), _T("RAK2"));
     iniFile.GetStr(m_altFleetNames[T_LL], _T("AltFleet"), _T("LL2"));
     iniFile.GetStr(m_altFleetNames[T_SL], _T("AltFleet"), _T("SL2"));
@@ -769,6 +784,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
     iniFile.GetStr(m_KBNames[T_SAT], _T("KBNames"), _T("KB_SAT"));
     iniFile.GetStr(m_KBNames[T_ZER], _T("KBNames"), _T("KB_ZER"));
     iniFile.GetStr(m_KBNames[T_TS], _T("KBNames"), _T("KB_TS"));
+    iniFile.GetStr(m_KBNames[T_IC], _T("KBNames"), _T("KB_IC"));
     iniFile.GetStr(m_KBNames[T_RAK], _T("KBNames"), _T("KB_RAK"));
     iniFile.GetStr(m_KBNames[T_LL], _T("KBNames"), _T("KB_LL"));
     iniFile.GetStr(m_KBNames[T_SL], _T("KBNames"), _T("KB_SL"));
@@ -922,25 +938,31 @@ bool CSpeedKernel::LoadShipData(char *SDFile) {
     if(!SDFile)
         return false;
     CIniFile iniFile(SDFile);
-    // shield
+    
     for(i = 0; i < T_END; i++) {
+        // shield
         if(iniFile.GetLong(num, _T("Shield"), m_IniFleetNames[i]))
             MaxShields[MAX_PLAYERS_PER_TEAM][ATTER][i] = num;
-    }
-    // damage
-    for(i = 0; i < T_END; i++) {
+        // damage
         if(iniFile.GetLong(num, _T("Damage"), m_IniFleetNames[i]))
             Dams[MAX_PLAYERS_PER_TEAM][ATTER][i] = num;
-    }
-    // cost
-    for(i = 0; i < T_END; i++) {
+        // cost
         if(iniFile.GetStr(s, _T("Cost"), m_IniFleetNames[i]))
             Kosten[i] = StringToRes(s);
+        if(i < T_SHIPEND)
+        {
+            // deuterium consumption
+            if(iniFile.GetLong(num, _T("Consumption"), m_IniFleetNames[i]))
+                Verbrauch[i] = num;
+            // capacity
+            if(iniFile.GetLong(num, _T("Capacity"), m_IniFleetNames[i]))
+                LadeKaps[i] = num;
+            // base speed
+            if(iniFile.GetLong(num, _T("BaseSpeed"), m_IniFleetNames[i]))
+                BaseSpeed[i] = num;
+        }
     }
-    for(i = 0; i < T_END; i++) {
-        if(iniFile.GetLong(num, _T("Consumption"), m_IniFleetNames[i]))
-            Verbrauch[i] = num;
-    }
+    
     return true;
 }
 
@@ -1011,6 +1033,57 @@ void CSpeedKernel::FillRFTable(RFTYPE rfType)
             m_RF[T_TS][T_GT] = 40;
             m_RF[T_TS][T_REC] = 40;
             m_RF[T_TS][T_KOLO] = 40;
+
+        }
+        break;
+    case RF_075:
+        {
+            for(i = 0; i < T_SHIPEND; i++)
+            {
+                m_RF[i][T_SPIO] = 2000;
+                m_RF[i][T_SAT] = 2000;
+            }
+            m_RF[T_SPIO][T_SPIO] = 10000;
+            m_RF[T_SPIO][T_SAT] = 10000;
+            m_RF[T_SAT][T_SAT] = 10000;
+
+            m_RF[T_SJ][T_KT] = 3333;
+
+            m_RF[T_KREUZER][T_LJ] = 1667;
+            m_RF[T_KREUZER][T_RAK] = 1000;
+
+            m_RF[T_ZER][T_LL] = 1000;
+            m_RF[T_ZER][T_IC] = 5000;
+
+            m_RF[T_BOMBER][T_LL] = 500;
+            m_RF[T_BOMBER][T_RAK] = 500;
+            m_RF[T_BOMBER][T_SL] = 1000;
+            m_RF[T_BOMBER][T_IONEN] = 1000;
+
+            m_RF[T_TS][T_SPIO] = 8;
+            m_RF[T_TS][T_SAT] = 8;
+            m_RF[T_TS][T_RAK] = 50;
+            m_RF[T_TS][T_LL] = 50;
+            m_RF[T_TS][T_LJ] = 50;
+            m_RF[T_TS][T_SS] = 333;
+            m_RF[T_TS][T_SL] = 100;
+            m_RF[T_TS][T_IONEN] = 100;
+            m_RF[T_TS][T_SJ] = 100;
+            m_RF[T_TS][T_GAUSS] = 200;
+            m_RF[T_TS][T_KREUZER] = 303;
+            m_RF[T_TS][T_BOMBER] = 400;
+            m_RF[T_TS][T_ZER] = 2000;
+            m_RF[T_TS][T_KT] = 40;
+            m_RF[T_TS][T_GT] = 40;
+            m_RF[T_TS][T_REC] = 40;
+            m_RF[T_TS][T_KOLO] = 40;
+            m_RF[T_TS][T_IC] = 667;
+
+            m_RF[T_IC][T_KT] = 3333;
+            m_RF[T_IC][T_GT] = 3333;
+            m_RF[T_IC][T_SJ] = 2500;
+            m_RF[T_IC][T_KREUZER] = 2500;
+            m_RF[T_IC][T_SS] = 1429;
         }
         break;
     }

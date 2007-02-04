@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -40,6 +40,7 @@ enum RFTYPE {
     RF_059,         /*!< for OGame >= v0.59 */
     RF_062,         /*!< for OGame >= v0.62 */
     RF_065,         /*!< for OGame >= v0.65 */
+    RF_075,         /*!< for OGame >= v0.75 */
     RF_USER,        /*!< user set RapidFire */
 };
 
@@ -79,6 +80,7 @@ enum ITEM_TYPE
 	T_SAT,          /*!< Solar Satellite */
 	T_ZER,          /*!< Destroyer */
 	T_TS,           /*!< Death Star */
+    T_IC,           /*!< Interceptor */
 
     // defense
 	T_RAK,          /*!< Missile Launcher */
@@ -279,10 +281,9 @@ struct SPEEDKERNEL_API PlaniPos
     //! Returns position in format GG:SSS:PP
     genstring ToString() const
     {
-        TCHAR c[64];
-        _stprintf(c, _T("%d:%d:%d"), Gala, Sys, Pos);
-        genstring s=c;
-        return s;
+        genstrstream c;
+        c << Gala << _T(":") << Sys << _T(":") << Pos;
+        return c.str();
     };
 };
 

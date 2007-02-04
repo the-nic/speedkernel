@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -47,7 +47,7 @@ int CSpeedKernel::MultiReadEspReport(genstring reports, TargetInfo* TIs, int nMa
     if(!m_EspLimiter.length())
         return 0;
     f = reports.find(m_EspLimiter);
-    while(f != genstring::npos && nEsp < nMaxTI) 
+    while(f != genstring::npos && nEsp < nMaxTI)
     {
         //TargetInfo ti;
         genstring r = reports.substr(0, f);
@@ -69,6 +69,8 @@ bool CSpeedKernel::ReadEspReport(genstring& r, int FleetID)
     TargetInfo ti;
     if(!ReadEspReport(r, ti))
         return false;
+    if(FleetID == 0)
+        m_LastReadTarget = ti;
     SetTargetInfo(ti, FleetID);
     return true;
 }
@@ -81,7 +83,7 @@ bool CSpeedKernel::ReadEspReport(genstring& r, TargetInfo& TargetData)
     TargetInfo ti;
 
 	genstring::size_type f = 0, f2 = 0;
-	
+
     // check, how complete this esp report is
     ti.State = REPORT_RES;
     tmp = _T("\n") + m_EspTitles[0];
@@ -93,7 +95,7 @@ bool CSpeedKernel::ReadEspReport(genstring& r, TargetInfo& TargetData)
     tmp  = _T("\n") + m_EspTitles[2];
     if(r.find(tmp) != genstring::npos && m_EspTitles[2].length())
         ti.State = REPORT_ALL;
-    
+
     tmp = r;
     // get coordinates
 	f = tmp.find(m_Spiostrings[0], 0);
@@ -179,7 +181,7 @@ bool CSpeedKernel::ReadEspReport(genstring& r, TargetInfo& TargetData)
         ti.Pos.bMoon = true;
     else
         ti.Pos.bMoon = false;
-    
+
     TargetData = ti;
     return true;
 }
@@ -193,7 +195,7 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
     bool founditem = false;
     int techs[3];
     memset(techs, 0, 3 * sizeof(int));
-    
+
     // read metal/crystal/deuterium and ignore mines etc.
     if(((f2 = s.find(m_Ress[0], 0)) != s.npos) && s.find(m_wrongRess[0], 0) != f2 && s.find(m_wrongRess2[0], 0) != f2)
     {
@@ -335,7 +337,7 @@ bool CSpeedKernel::ReadOverview(const genstring& s, int FleetID)
         items[i].OwnerID = FleetID;
     }
 	SetFleet(&items, NULL);
-	m_NumShipsAtt = items; 
+	m_NumShipsAtt = items;
 
 	return true;
 }
@@ -348,9 +350,9 @@ bool CSpeedKernel::ReadOwnFleet(const genstring &OwnFleet, int FleetID) {
 	genstring name, anz, name2;
     genstring::size_type f;
     int i, num = 0;
-    
+
     // fleet from fleet menu
-    for(i = 0; i < T_TS+1; i++) {
+    for(i = 0; i < T_SHIPEND; i++) {
         if(i == T_SAT)
             continue;
         name = ItemName((ITEM_TYPE)i);
@@ -432,7 +434,7 @@ bool CSpeedKernel::ReadCR(const genstring &KB) {
     tmp = KB;
     genstring::size_type f, f2, f3 = 0;
     genstring OrgKBNames[T_END];
-    
+
     f = tmp.find(m_Attacker);
     f2 = tmp.find(m_Defender);
     if(f == genstring::npos || f2 == genstring::npos || f > f2)
@@ -441,6 +443,9 @@ bool CSpeedKernel::ReadCR(const genstring &KB) {
     while(f3 != genstring::npos) {
         if((f3 = tmp.find(_T('\t'))) != genstring::npos) {
             tmp[f3] = _T(' ');
+        }
+        else if((f3 = tmp.find(_T("\r\n"))) != genstring::npos) {
+            tmp.erase(f3, 1);
         }
         else if((f3 = tmp.find(_T("  "))) != genstring::npos) {
             tmp.erase(f3, 1);
@@ -463,7 +468,7 @@ bool CSpeedKernel::ReadCR(const genstring &KB) {
             }
         }
     }
-    
+
     tmp += _T(" \n");
     f = 0;
     // get attacker's / defender's tables
@@ -497,6 +502,10 @@ bool CSpeedKernel::ReadCR(const genstring &KB) {
     }
     f = 0;
     stoppos = tmp.find(m_Attacker, stoppos);
+    if(stoppos == genstr::npos)
+    {
+        stoppos = tmp.length();
+    }
     while(((f = tmp.find(m_Defender, f)) < stoppos) && f != genstring::npos) {
         vector<SItem> tmp_def;
         ShipTechs tmp_Techs;
@@ -550,7 +559,7 @@ bool CSpeedKernel::ReadCRTable(genstring Table, vector<SItem> &Fleet, ShipTechs&
     int team = -1;
     // empty techs
     memset(&techs, 0, sizeof(ShipTechs));
-	
+
 	f2 = Table.find(m_KBTable[1]);
     Fleet.clear();
     // weapon tech
@@ -578,12 +587,12 @@ bool CSpeedKernel::ReadCRTable(genstring Table, vector<SItem> &Fleet, ShipTechs&
     }
     if(f2 == genstring::npos || f == genstring::npos)
         return false;
-    
+
     // 'collect' unit types in correct order
     while(f < f2-1) {
         f3 = Table.find(_T(' '), f);
         if(f3 > f2)
-            f3 = Table.find(_T('\n'), f )-1;
+            f3 = Table.find(_T('\n'), f );
         genstring tmp2 = Table.substr(f, f3-f);
         tmp_SItem.Type = GetItemType(tmp2);
         Fleet.push_back(tmp_SItem);
@@ -594,7 +603,7 @@ bool CSpeedKernel::ReadCRTable(genstring Table, vector<SItem> &Fleet, ShipTechs&
         f2 = Table.length();
     if(f == genstring::npos)
         return false;
-    
+
     // remove dots from 'Number'-line
     for(size_t i = f; i < f2; i++) {
         if(Table[i] == '.')
@@ -614,8 +623,6 @@ bool CSpeedKernel::ReadCRTable(genstring Table, vector<SItem> &Fleet, ShipTechs&
     // try to calculate the technologies from the table, if needed
     ITEM_TYPE t = Fleet[0].Type;
 	f = Table.find(m_KBTable[1]);
-	if((f2 = Table.find(_T(":"), f)) != genstring::npos)
-		Table[f2] = _T('.');
     if((f2 = Table.find(m_KBTable[2], f)) != genstring::npos && techs.Weapon == 0) {
         genstring val = Table.substr(f2 + m_KBTable[2].length());
 #ifdef UNICODE

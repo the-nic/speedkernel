@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthï¿½& Nicolas Hï¿½t
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string>
 #include <cstdio>
 #include <cctype>
+
+#include "utf8.h"
 
 #undef _tcslen
 #undef _tcstol
@@ -93,10 +95,12 @@ public:
     // resets the ini data
     void ClearData();
 private:
-    genstr GetNextLine(FILE* file, bool is_unicode);
+    genstr GetNextLine(FILE* file);
     genstr RemoveSpaces(genstr str, bool remove_first, bool remove_last);
     // converts a string into upper or lower case
     genstr ChgCase(genstr str, bool to_upper);
+    string WStringToUTF8(wstring str);
+    wstring UTF8ToWString(string str);
 
     // to save strings in correct case (reading=case insensitive, writing=case sensitive)
     // (only for keys and sections)
@@ -105,6 +109,13 @@ private:
 
     typedef map<genstr, map<genstr, genstr> > IniData;
     IniData m_mIniData;
+
+    enum
+    {
+        F_ANSI,
+        F_UTF16LE,
+        F_UTF8,
+    } m_FileFormat;
 
 
     bool m_DelFirstSpaces;

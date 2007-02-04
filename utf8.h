@@ -31,6 +31,13 @@ DEALINGS IN THE SOFTWARE.
 #include <iterator>
 #include <exception>
 
+// VC++ 6.0 bugfixing
+#if _MSC_VER < 1300 && defined(_MSC_VER)
+#define utf8_difference_type int
+#else
+#define utf8_difference_type std::iterator_traits<octet_iterator>::difference_type
+#endif
+
 namespace utf8
 {
     // The typedefs for 8-bit, 16-bit and 32-bit unsigned integers
@@ -117,7 +124,7 @@ namespace internal
     }  
 
     template <typename octet_iterator>
-    inline typename std::iterator_traits<octet_iterator>::difference_type
+    inline typename utf8_difference_type
     sequence_length(octet_iterator lead_it)
     {
         uint8_t lead = mask8(*lead_it);
@@ -140,8 +147,8 @@ namespace internal
     {
         uint32_t cp = mask8(*it);
         // Check the lead octet
-        typedef typename std::iterator_traits<octet_iterator>::difference_type octet_differece_type;
-        octet_differece_type length = sequence_length(it);
+        typedef typename utf8_difference_type octet_difference_type;
+        octet_difference_type length = sequence_length(it);
 
         // "Shortcut" for ASCII characters
         if (length == 1) {
@@ -215,7 +222,7 @@ namespace internal
         }
         // Is the code point valid?
         if (!is_code_point_valid(cp)) {
-            for (octet_differece_type i = 0; i < length - 1; ++i) 
+            for (octet_difference_type i = 0; i < length - 1; ++i) 
                 --it;
             return INVALID_CODE_POINT;
         }
@@ -225,21 +232,21 @@ namespace internal
             
         if (cp < 0x80) {
             if (length != 1) {
-                for (octet_differece_type i = 0; i < length - 1; ++i)
+                for (octet_difference_type i = 0; i < length - 1; ++i)
                     --it;
                 return OVERLONG_SEQUENCE;
             }
         }
         else if (cp < 0x800) {
             if (length != 2) {
-                for (octet_differece_type i = 0; i < length - 1; ++i)
+                for (octet_difference_type i = 0; i < length - 1; ++i)
                     --it;
                 return OVERLONG_SEQUENCE;
             }
         }
         else if (cp < 0x10000) {
             if (length != 3) {
-                for (octet_differece_type i = 0; i < length - 1; ++i)
+                for (octet_difference_type i = 0; i < length - 1; ++i)
                     --it;
                 return OVERLONG_SEQUENCE;
             }
@@ -284,7 +291,7 @@ namespace internal
            );
     }
     template <typename octet_iterator>
-    octet_iterator append(uint32_t cp, octet_iterator result)
+    octet_iterator append(uint32_t cp, octet_iterator& result)
     {
         if (!internal::is_code_point_valid(cp)) 
             throw invalid_code_point(cp);
@@ -363,10 +370,10 @@ namespace internal
     }
 
     template <typename octet_iterator>
-    typename std::iterator_traits<octet_iterator>::difference_type
+    typename utf8_difference_type
     distance (octet_iterator first, octet_iterator last)
     {
-        typename std::iterator_traits<octet_iterator>::difference_type dist;
+        typename utf8_difference_type dist;
         for (dist = 0; first < last; ++dist) 
             next(first, last);
         return dist;
@@ -390,7 +397,7 @@ namespace internal
                     throw invalid_utf16(static_cast<uint16_t>(*start));
             
             }
-            result = append(cp, result);
+            append(cp, result);
         }
         return result;        
     }
@@ -414,7 +421,7 @@ namespace internal
     octet_iterator utf32to8 (u32bit_iterator start, u32bit_iterator end, octet_iterator result)
     {
         while (start != end)
-            result = append(*(start++), result);
+            append(*(start++), result);
 
         return result;
     }
@@ -484,13 +491,20 @@ namespace internal
         }
 
         template <typename octet_iterator>
-        uint32_t previous(octet_iterator& it)
+        uint32_t prior(octet_iterator& it)
         {
             while (internal::is_trail(*(--it))) ;
             octet_iterator temp = it;
             return next(temp);
         }
 
+        // Deprecated in versions that include prior, but only for the sake of consistency (see utf8::previous)
+        template <typename octet_iterator>
+        inline uint32_t previous(octet_iterator& it)
+        {
+            return prior(it);
+        }
+        
         template <typename octet_iterator, typename distance_type>
         void advance (octet_iterator& it, distance_type n)
         {
@@ -499,7 +513,7 @@ namespace internal
         }
 
         template <typename octet_iterator>
-        typename std::iterator_traits<octet_iterator>::difference_type
+        typename utf8_difference_type
         distance (octet_iterator first, octet_iterator last)
         {
             typename std::iterator_traits<octet_iterator>::difference_type dist;

@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004, 2005 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -285,10 +285,11 @@ bool CSpeedKernel::Simulate(int count)
 
     m_InitSim = true;
 	int num, round;
-//	CheckVector(m_NumShipsAtt);
+    m_CurrentSim = 0;
 
     for(num = 0; num < count; num++)
 	{
+        m_CurrentSim++;
         (*m_AttObj) = Att;
 		(*m_DefObj) = Def;
 		for(round = 1; round < 7; round++)
@@ -381,9 +382,11 @@ bool CSpeedKernel::Simulate(int count)
     Att.clear();
     Def.clear();
     m_SimulateFreedItsData = true;
+    m_CurrentSim = 0;
     
     if(!num && aborted)
         return false;
+
     else if (aborted)
     {
 #ifdef CREATE_ADV_STATS
@@ -437,6 +440,11 @@ void CSpeedKernel::MaxAllShields()
         id = (*m_DefObj)[i].PlayerID;
 		(*m_DefObj)[i].Shield = MaxShields[id][DEFFER][(*m_DefObj)[i].Type];
     }
+}
+
+int CSpeedKernel::GetCurrentSim()
+{
+    return m_CurrentSim;
 }
 
 void CSpeedKernel::ShipsDontExplode()

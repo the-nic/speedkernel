@@ -7,6 +7,7 @@ TARGET +=
 DEPENDPATH += .
 INCLUDEPATH += .
 CONFIG += staticlib
+#DEFINES += UNICODE
 
 # Input
 HEADERS += CIniFile.h \

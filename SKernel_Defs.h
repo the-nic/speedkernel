@@ -1,6 +1,6 @@
 /*
 SpeedSim - an OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFFER 1
 
 // version of kernel
-#define KERNEL_VERSION _T("0.9.5.2b")
+#define KERNEL_VERSION _T("0.9.6.0b")
 
 //! default defense rebuild factor
 #define DEF_AUFBAU_FAKTOR 0.80f
@@ -95,9 +95,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // maximum number of fleets per team
 #define MAX_PLAYERS_PER_TEAM 16
-
-// new ship?
-//#define NEWSHIP
 
 /*!
     \def UNICODE

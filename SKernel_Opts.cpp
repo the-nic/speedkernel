@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2006 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -44,11 +44,7 @@ void CSpeedKernel::SetDefRebuildFactor(float RebuildFac) {
 
 void CSpeedKernel::ResetWaveState()
 {
-    // ToDo
-    SetTargetInfo(m_DefenderInfos[0], 0, true);
-	/*m_Waves.TotalPlunder = m_Result.GesamtBeute = Res();
-	m_Waves.NumAtts = m_Result.NumAtts = 0;
-    m_Waves.TotalRecs = m_Result.GesamtRecs = 0;*/
+    SetTargetInfo(m_LastReadTarget, 0, true);
 }
 
 void CSpeedKernel::SetCallBack(void (*f)(int sim, int round)) {
