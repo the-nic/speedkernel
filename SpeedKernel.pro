@@ -3,11 +3,16 @@
 ######################################################################
 
 TEMPLATE = lib
-TARGET += 
+TARGET +=
 DEPENDPATH += .
 INCLUDEPATH += .
-CONFIG += staticlib
+CONFIG += staticlib debug
 #DEFINES += UNICODE
+unix {
+	debug {
+		QMAKE_CFLAGS_DEBUG    = -O0 -g3
+	}
+}
 
 # Input
 HEADERS += CIniFile.h \
