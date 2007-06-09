@@ -6,11 +6,12 @@ TEMPLATE = lib
 TARGET +=
 DEPENDPATH += .
 INCLUDEPATH += .
-CONFIG += staticlib debug
+CONFIG += staticlib
 #DEFINES += UNICODE
 unix {
 	debug {
 		QMAKE_CFLAGS_DEBUG    = -O0 -g3
+		QMAKE_CXXFLAGS_DEBUG    = -O0 -g3
 	}
 }
 
