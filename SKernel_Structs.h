@@ -60,6 +60,18 @@ enum TEXTTYPE {
 };
 
 /*!
+    \enum REBUILD_OPTION
+    \brief Options for rebuilding defense
+    \sa CSpeedKernel::SetRemainingItemsInDef()
+*/
+enum REBUILD_OPTION
+{
+    REBUILD_BESTCASE,
+    REBUILD_WORSTCASE,
+    REBUILD_AVG,
+};
+
+/*!
     \enum ITEM_TYPE
     \brief This enum describes the Type of the ship/defense unit
 */
@@ -435,7 +447,7 @@ struct SPEEDKERNEL_API BattleResult
 };
 
 /*!
-    \struct BattleResult
+    \struct IPMBattleResult
     \brief This struct contains information about the battle result after an IPM combat
 */
 struct SPEEDKERNEL_API IPMBattleResult
@@ -479,14 +491,20 @@ struct SPEEDKERNEL_API ShipTechs {
 };
 
 /*!
-    \struct ShipTechs
+    \struct WaveInfo
     \brief Data for wave attacks.
 */
-struct SPEEDKERNEL_API WaveInfo {
+struct SPEEDKERNEL_API WaveInfo
+{
+    //! All plundered resources
     Res TotalPlunder;
+    //! Number of attacks
     int NumAtts;
+    //! Number of recyclers needed after the waves
     int TotalRecs;
+    //! Size of debris after attacks
     Res TotalDebris;
+    //! Total own losses
     Res TotalLosses;
 
     WaveInfo() {
@@ -516,7 +534,7 @@ struct SPEEDKERNEL_API TargetInfo
     PlaniPos Pos;
     //! Target name
     TCHAR Name[64];
-    //! fleet deplyed there
+    //! fleet deployed there
     vector<SItem> Fleet;
     //! built defence
     vector<SItem> Defence;

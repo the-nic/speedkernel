@@ -52,7 +52,8 @@ bool CSpeedKernel::GetFleetAfterSim(SItem* Attacker, SItem* Defender, int FleetI
 {
 	size_t i;
 
-    if(Attacker && m_NumShipsAtt.size()) {
+    if(Attacker)
+    {
         for(i = 0; i < T_END; i++) {
             Attacker[i].Type = (ITEM_TYPE)i;
             Attacker[i].Num = 0;
@@ -69,7 +70,8 @@ bool CSpeedKernel::GetFleetAfterSim(SItem* Attacker, SItem* Defender, int FleetI
             Attacker[i].Type = T_NONE;
     }
 
-    if(Defender && m_NumShipsDef.size()) {
+    if(Defender)
+    {
         for(i = 0; i < T_END; i++) {
             Defender[i].Type = (ITEM_TYPE)i;
             Defender[i].Num = 0;
@@ -446,7 +448,7 @@ void CSpeedKernel::GenerateCRTable(genstrstream &out, const vector<SItem> &Items
     if(Player != -1) {
         ShipTechs techs = (Team == ATTER ? m_TechsAtt[Player] : m_TechsDef[Player]);
         out << m_KBTechs[0] << _T(":+") << techs.Weapon * 10 << _T("%&nbsp;") << m_KBTechs[1]
-            << _T(":+") << techs.Shield * 10 << _T("%&nbsp;") << m_KBTechs[1] << _T(":+")
+            << _T(":+") << techs.Shield * 10 << _T("%&nbsp;") << m_KBTechs[2] << _T(":+")
             << techs.Armour * 10 << _T("%\n");
     }
     else
@@ -458,17 +460,18 @@ void CSpeedKernel::GenerateCRTable(genstrstream &out, const vector<SItem> &Items
     // item names
     for(k = 0; k < Items.size(); k++)
     {
-        if(Items[k].Num)
+        int num = ceil(Items[k].Num - 0.5f);
+        if(num)
             out << _T("<td><b>") << CRItemName((ITEM_TYPE)Items[k].Type) << _T("</b></td>");
     }
     out << _T("</tr>") << _T("\n") << _T("<tr><td><b>") << m_KBTable[1] << _T("</b></td>");
     // number of ships
     for(k = 0; k < Items.size(); k++)
     {
-        if(Items[k].Num)
+        int num = ceil(Items[k].Num - 0.5f);
+        if(num)
         {
-            int n = ceil(Items[k].Num - 0.5f);
-			out << _T("<td>") << n << _T("</td>");
+			out << _T("<td>") << num << _T("</td>");
         }
     }
 
@@ -476,7 +479,8 @@ void CSpeedKernel::GenerateCRTable(genstrstream &out, const vector<SItem> &Items
     // damage
     for(k = 0; k < Items.size(); k++)
     {
-        if(Items[k].Num)
+        int num = ceil(Items[k].Num - 0.5f);
+        if(num)
         {
             double dam = Dams[Player][Team][Items[k].Type];
             if(ceil(dam) == dam)
@@ -490,7 +494,8 @@ void CSpeedKernel::GenerateCRTable(genstrstream &out, const vector<SItem> &Items
     out << _T("</tr>") << _T("\n") << _T("<tr><td><b>") << m_KBTable[3] << _T("</b></td>");
     for(k = 0; k < Items.size(); k++)
     {
-        if(Items[k].Num)
+        int num = ceil(Items[k].Num - 0.5f);
+        if(num)
         {
             double shield = MaxShields[Player][Team][Items[k].Type];
             if(ceil(shield) == shield)
@@ -504,7 +509,8 @@ void CSpeedKernel::GenerateCRTable(genstrstream &out, const vector<SItem> &Items
     out << _T("</tr>") << _T("\n") << _T("<tr><td><b>") << m_KBTable[4] << _T("</b></td>");
     for(k = 0; k < Items.size(); k++)
     {
-        if(Items[k].Num)
+        int num = ceil(Items[k].Num - 0.5f);
+        if(num)
         {
             double hull = MaxLifes[Player][Team][Items[k].Type];
             if(ceil(hull) == hull)

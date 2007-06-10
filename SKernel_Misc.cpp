@@ -253,13 +253,13 @@ void CSpeedKernel::ComputeShipData()
             Dams[ID][ATTER][i] = Dams[MAX_PLAYERS_PER_TEAM][ATTER][i];
 
 
-            MaxLifes[ID][DEFFER][i] *= LifeFak_v;
-            MaxShields[ID][DEFFER][i] *= ShFak_v;
-            Dams[ID][DEFFER][i] *= DamFak_v;
+            MaxLifes[ID][DEFFER][i] = floor(MaxLifes[ID][DEFFER][i] * LifeFak_v);
+            MaxShields[ID][DEFFER][i] = floor(MaxShields[ID][DEFFER][i] * ShFak_v);
+            Dams[ID][DEFFER][i] = floor(Dams[ID][DEFFER][i] * DamFak_v);
 
-            MaxLifes[ID][ATTER][i] *= LifeFak_a;
-            MaxShields[ID][ATTER][i] *= ShFak_a;
-            Dams[ID][ATTER][i] *= DamFak_a;
+            MaxLifes[ID][ATTER][i] = floor(MaxLifes[ID][ATTER][i] * LifeFak_a);
+            MaxShields[ID][ATTER][i] = floor(MaxShields[ID][ATTER][i] * ShFak_a);
+            Dams[ID][ATTER][i] = floor(Dams[ID][ATTER][i] * DamFak_a);
         }
     }
     if(!m_ShipDataFromFile)
@@ -472,30 +472,58 @@ int CSpeedKernel::GetFleetSpeed(int FleetID, const vector<SItem>& vFleet)
     return min;
 }
 
-void CSpeedKernel::SetRemainingItemsInDef()
+void CSpeedKernel::SetRemainingItemsInDef(REBUILD_OPTION opt)
 {
 	vector<SItem> items;
 	int i;
+    size_t j;
+    
+    double rem_units = 0;
 
 	items.resize(T_END);
 	for(i = 0; i < T_END; i++)
 	{
+        rem_units = 0;
+        // count remaining ships based on the option
+        switch(opt)
+        {
+        case REBUILD_BESTCASE:
+            rem_units = m_BestCaseDef[i];
+            break;
+        case REBUILD_WORSTCASE:
+            rem_units = m_WorstCaseDef[i];
+            break;
+        case REBUILD_AVG:
+            for (j = 0; j < m_NumShipsDef.size(); j++)
+            {
+                if(m_NumShipsDef[j].Type == (ITEM_TYPE)i)
+                    rem_units += m_NumShipsDef[j].Num;
+            }
+            break;
+        default:
+            return;
+        }
+
 		items[i].Type = (ITEM_TYPE)i;
-        // ToDo
         items[i].OwnerID = 0;
+        items[i].Num = 0;
         if(i < T_SHIPEND)
-			items[i].Num = m_BestCaseDef[i];
-        else {
-            int NumUnits = 0;
+            items[i].Num = rem_units;
+        else
+        {
+            double NumUnits = 0;
             // get the number of set def units
-            for(size_t j = 0; j < m_NumSetShipsDef.size(); j++) {
-                if(m_NumSetShipsDef[j].Type == i)
+            for(j = 0; j < m_NumSetShipsDef.size(); j++) 
+            {
+                if(m_NumSetShipsDef[j].Type == (ITEM_TYPE)i)
                     NumUnits += m_NumSetShipsDef[j].Num;
             }
             if(m_RebuildSmallDef && NumUnits <= 10)
                 items[i].Num = NumUnits;
             else
-                items[i].Num = int(m_BestCaseDef[i] + m_DefRebuildFac * (NumUnits - m_BestCaseDef[i]));
+            {
+                items[i].Num = floor(rem_units + m_DefRebuildFac * (NumUnits - rem_units) + 0.5);
+            }
          }
 	}
 
@@ -582,7 +610,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_FleetNames[T_KOLO] = _T("Kolonieschiff");
         m_FleetNames[T_REC] = _T("Recycler");
         m_FleetNames[T_BOMBER] = _T("Bomber");
-        m_FleetNames[T_SAT] = _T("Solar Satellit");
+        m_FleetNames[T_SAT] = _T("Solarsatellit");
         m_FleetNames[T_ZER] = _T("Zerst\xF6rer");
         m_FleetNames[T_TS] = _T("Todesstern");
         m_FleetNames[T_IC] = _T("Schlachtkreuzer");
@@ -599,7 +627,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_altFleetNames[T_GT] = _T("Grosser Transporter");
         m_altFleetNames[T_LJ] = _T("Leichter Jaeger");
         m_altFleetNames[T_SJ] = _T("Schwerer Jaeger");
-        m_altFleetNames[T_SAT] = _T("Solarsatellit");
+        m_altFleetNames[T_SAT] = _T("Solar Satellit");
         m_altFleetNames[T_ZER] = _T("Zerstoerer");
         m_altFleetNames[T_LL] = _T("Leichtes Lasergeschuetz");
         m_altFleetNames[T_SL] = _T("Schweres Lasergeschuetz");
@@ -619,7 +647,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_KBNames[T_SAT] = _T("Sol. Sat");
         m_KBNames[T_ZER] = _T("Zerst.");
         m_KBNames[T_TS] = _T("Rip");
-        m_KBNames[T_IC] = _T("S.Krz");
+        m_KBNames[T_IC] = _T("Schlachtkr.");
         m_KBNames[T_RAK] = _T("Rak.");
         m_KBNames[T_LL] = _T("L.Laser");
         m_KBNames[T_SL] = _T("S.Laser");
@@ -678,7 +706,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_KBResult[4] = _T("Das Ergebnis des Kampfes ist nicht exakt vorrauszusehen.");
         m_KBResult[5] = _T("Er erbeutet %d Metall, %d Kristall und %d Deuterium");
         m_KBResult[6] = _T("Der Angreifer gewinnt mit %.0f%% Wahrscheinlichkeit, der Verteidiger gewinnt zu %.0f%% Wahrscheinlichkeit.");
-        m_KBResult[7] = _T("Der Kampf geht mit %.0f%% Wahrscheinlichkeit unentschieden aus.");
+        m_KBResult[7] = _T("Der Kampf geht zu %.0f%% Unentschieden aus.");
         m_KBResult[8] = _T("Vernichtet");
         m_KBLoss[0] = _T("Der Angreifer hat insgesamt %s Units + %s Deuterium verloren.");
         m_KBLoss[1] = _T("Der Verteidiger hat insgesamt %s Units + %s Deuterium verloren.");

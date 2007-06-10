@@ -550,25 +550,14 @@ void CSpeedKernel::ShipShoots(Obj& o, int Team, DWORD AtterID)
 		}
 
         obj = &(*treffer)[Ziel];
-        if(obj->Shield) {
-            if(100.f * Dam / MaxShields[DefferID][ZielTeam][obj->Type] < 1) {
-                // if damage < 1% of shield, set damage to 0
-                Dam = 0;
-                Dam2 = Dam;
-            }
-            else if(!m_NewShield)
-            {
-				// round damage
-                // old shield calculation
-                Dam = MaxShields[DefferID][ZielTeam][obj->Type] * floor(100.0f * Dam / MaxShields[DefferID][ZielTeam][obj->Type]);
-		        Dam /= 100.0f;
-		        Dam2 = Dam;
-            }
-            else
-            {
-                Dam = floor(Dam * 10.f) / 10.f;
-                Dam2 = Dam;
-            }
+        if(Dam < obj->Shield)
+        {
+            // round damage down to full percents
+            float perc = floor(100.0f * Dam / MaxShields[DefferID][ZielTeam][obj->Type]);
+            Dam = MaxShields[DefferID][ZielTeam][obj->Type] * perc;
+            Dam /= 100.0f;
+            
+            Dam2 = Dam;
         }
 		if(obj->Shield <= 0 || Dam > 0)
 		{
@@ -607,7 +596,6 @@ void CSpeedKernel::ShipShoots(Obj& o, int Team, DWORD AtterID)
         }
 		// can shoot this at ship again?
 		ShootsAgain = CanShootAgain(o.Type, obj->Type);
-        //ShootsAgain = CanShootAgain_V059(o.Type, obj->Type);
 	}
 	return;
 }
@@ -1112,6 +1100,16 @@ void CSpeedKernel::AbortSim()
 		u++;
 }
 
+void CSpeedKernel::SendStopSim()
+{
+    m_DataIsDeleted = true;
+}
+
+bool CSpeedKernel::IsSimulating()
+{
+    return m_SimulateFreedItsData;
+}
+
 
 IPMBattleResult CSpeedKernel::SimulateIPM(int NumIPM, int NumABM, int FleetID, ITEM_TYPE PrimaryItem /* = T_RAK*/)
 {
@@ -1119,6 +1117,7 @@ IPMBattleResult CSpeedKernel::SimulateIPM(int NumIPM, int NumABM, int FleetID, I
     IPMBattleResult br;
     TargetInfo ti = GetTargetInfo(FleetID);
     ComputeShipData();
+    m_NumShipsDef = m_NumSetShipsDef;
     // damage needed to destroy thw whole defense
     int NeededDam = 0;
     

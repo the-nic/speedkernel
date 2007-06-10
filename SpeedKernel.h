@@ -47,7 +47,7 @@ using namespace std;
     \endcode
     \author Nicolas Höft
     \author Maximilian Matthé
-    \date 2004-2006
+    \date 2004-2007
 */
 
 class SPEEDKERNEL_API CSpeedKernel
@@ -68,7 +68,15 @@ public:
     bool Simulate(int count = 1);
 
     //! Aborts the simulation - works only, if you simulate in a different thread
+    //! This function returns after the simulation has stopped
     void AbortSim();
+
+    //! Sends a message to the simulation to stop it
+    //! This funtion returns immediatly
+    void SendStopSim();
+
+    //! Checks, if there is a simulation still running
+    bool IsSimulating();
 
     //! reset all options / SpeedSimData
     void Reset();
@@ -79,8 +87,9 @@ public:
     //! simulates an ip missiles attack
     IPMBattleResult SimulateIPM(int NumIPM, int NumABM, int FleetID, ITEM_TYPE PrimaryItem = T_RAK);
 
-    //! \name Fleet related functions
-    //! Functions important for fleet information
+    /*! \name Fleet related functions
+        Functions important for fleet information
+    */    
     //@{
     //! Gets the worth of the currently set fleet
     void GetFleetWorth(Res &att, Res &def);
@@ -102,9 +111,11 @@ public:
         Please only set different fleets (for Alliance Combat System) in the correct order
         or one by another.
         Fleets with the same ID will be overwritten
-        \sa SetFleet()
         \param[in] size_att Array size of 'Attacker'
         \param[in] size_def Array size of 'Defender'
+        \param[in] Attacker Pointer to Attackers
+        \param[in] Defender Pointer to Defenders
+        \sa SetFleet()
     */
     bool SetFleet(SItem* Attacker, SItem* Defender, int size_att, int size_def);
 
@@ -125,9 +136,18 @@ public:
     /*!
         \param[out] Attacker, Defender array size has to be T_END
         \param[in] FleetID ID of the Attacker/Defender you want the fleet from
+
         If Attacker or Defender are NULL the fleet won't be returned to that one
     */
     bool GetSetFleet(SItem* Attacker, SItem* Defender, int FleetID);
+    //! Returns the current set fleet for a certain FleetID
+    /*!
+        \param[out] Attacker, Defender Pointer to vector of the target SItems. 
+            Content will be overwritten.
+        \param[in] FleetID ID of the Attacker/Defender you want the fleet from
+        
+         If Attacker or Defender are NULL the fleet won't be returned to that one
+    */
     bool GetSetFleet(vector<SItem>* Attacker, vector<SItem>* Defender, int FleetID);
 
     //! Sets the Technologies for a certain attacker and defender
@@ -162,8 +182,10 @@ public:
     */
     void GetSpeed(int &perc_speed, int &v, int &i, int &h, int FleetID);
     //@}
-    //! Rebuilds defense, removes the robbered resources and sets the best case for the attacker for the fleets
-    void SetRemainingItemsInDef();
+
+    //! Rebuilds defense, removes the robbered resources
+    //! \param[in] opt to set how the destroyed ships are calculated
+    void SetRemainingItemsInDef(REBUILD_OPTION opt = REBUILD_AVG);
 
 
     //! \name Reading Functions
@@ -172,20 +194,26 @@ public:
     /** Reading functions for reading in several OGame texts */
 
     //! Reads in an espionage report
+    //! \param[in] r The espionage report
     //! \param[out] ti Contains information read in
-    bool ReadEspReport(genstring& r, TargetInfo& ti);
+    bool ReadEspReport(genstring r, TargetInfo& ti);
     //! Reads in an espionage report
     //! \param[in] FleetID To which fleet slot is the data set to
-    bool ReadEspReport(genstring& r, int FleetID);
+    bool ReadEspReport(const genstring& r, int FleetID);
     //! reads in more esp reports
-    //! \return Number of espionage reports detected
+    /*! 
+        \param[in] reports Text containing 1 or more espionage report(s)
+        \param[out] TIs Array where the reports will be read in
+        \param[in] nMaxTI Max size of target infos being saved in TIs
+        \return Number of espionage reports detected
+    */
     int MultiReadEspReport(genstring reports, TargetInfo* TIs, int nMaxTI);
 	//! Reads in the overview if you're being attacked and have a espionage technology > 7
     //! \sa GeneralRead()
     bool ReadOverview(const genstring& s, int FleetID);
     //! Reads the fleet from the fleet menu
-    //! \sa GeneralRead()
-    bool ReadOwnFleet(const genstring &OwnFleet, int FleetID);
+    //*! \sa GeneralRead() */
+    bool ReadOwnFleet(genstring OwnFleet, int FleetID);
     //! Reads in a combat report
     //! \sa GeneralRead()
     bool ReadCR(const genstring &KB);
@@ -213,8 +241,6 @@ public:
 	void SetDefInDebris(bool really);
     //! sets the RF used in the simulation
 	void SetRF(RFTYPE ver);
-    //! Use new shield calculation - NOT USED
-    void SetNewShield(bool really);
     //! Use new fuel calculation (OGame > v0.68a
     void SetNewFuel(bool bNewFuel);
     //! Sets the factor how many defense units will be rebuilt in SetRemainingItemsInDef
@@ -250,8 +276,20 @@ public:
     /*! \sa SetOwnPosition() */
     void GetOwnPosition(PlaniPos& p, int FleetID);
     //! Sets information for defender
-    void SetTargetInfo(TargetInfo TI, int FleetID, bool ResetWavesState = true);
+    /*!
+        Sets the defenders information without a espionage report
+        \param[in] TI The target information
+        \param[in] FleetID fleet position in the battle
+        \param[in] ResetWaveState 
+        \sa GetTargetInfo()
+    */
+    void SetTargetInfo(TargetInfo TI, int FleetID, bool ResetWaveState = true);
     //! Get the information of defender
+    /*! 
+        \param[in] FleetID Position of the defender in combat
+        \return All information of the defender
+        \sa SetTargetInfo(), ResetWaveState()
+    */
     TargetInfo GetTargetInfo(int FleetID);
 
     //! Resets the state wave
@@ -263,13 +301,17 @@ public:
     */
     void SetCSSFiles(TCHAR* cr_css, TCHAR* bwc_css);
     //@}
+    
     //! Generates the BWC html into file
     /*!
         \return false if file could not created or the data hasn't been collected. Else true will be returned.
         \sa SetComputeBestWorstCase
     */
     bool GenerateBWC(const char* file);
-    //! \return The BestWorst-Case HTML data (is in UTF-8 format)
+    //! Generates a B/W-Case file and returns only the content (nothing will be written)
+    /*! 
+        \return The BestWorst-Case HTML data (is in UTF-8 format)
+    */
     string GenerateBWC();
 
     //! Generates the combat report
@@ -426,11 +468,6 @@ private:
 
     void FillRFTable(RFTYPE rfType);
 
-    // Rapid Fire only for OptShipShoots
-#ifdef INCL_OPTIMIZED_FUNCTIONS
-    bool CanShootAgain_Optimized(ITEM_TYPE AttType, ITEM_TYPE TargetType);
-#endif
-
 	// pointer to function which outputs number of rounds and simulations
     void (*m_FuncPtr)(int sim, int round);
 
@@ -480,7 +517,6 @@ private:
     bool m_LastScanHadTechs;
     bool m_BracketNames;
 
-    bool m_NewShield;
     float m_DefRebuildFac;
     bool m_ShipDataFromFile;
 

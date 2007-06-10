@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFFER 1
 
 // version of kernel
-#define KERNEL_VERSION _T("0.9.6.0b")
+#define KERNEL_VERSION _T("0.9.6.1b")
 
 //! default defense rebuild factor
 #define DEF_AUFBAU_FAKTOR 0.80f

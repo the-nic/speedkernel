@@ -74,7 +74,6 @@ CSpeedKernel::CSpeedKernel()
     LoadLangFile(NULL);
 	// set to newest version
     CanShootAgain = CanShootAgain_V065;
-    //m_NewShield = true;
     m_NewFuel = true;
     m_DefRebuildFac = DEF_AUFBAU_FAKTOR;
     m_LastScanHadTechs = false;

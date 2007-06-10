@@ -64,7 +64,7 @@ int CSpeedKernel::MultiReadEspReport(genstring reports, TargetInfo* TIs, int nMa
 }
 
 
-bool CSpeedKernel::ReadEspReport(genstring& r, int FleetID)
+bool CSpeedKernel::ReadEspReport(const genstring& r, int FleetID)
 {
     TargetInfo ti;
     if(!ReadEspReport(r, ti))
@@ -76,7 +76,7 @@ bool CSpeedKernel::ReadEspReport(genstring& r, int FleetID)
 }
 
 // reads esp. reports
-bool CSpeedKernel::ReadEspReport(genstring& r, TargetInfo& TargetData)
+bool CSpeedKernel::ReadEspReport(genstring r, TargetInfo& TargetData)
 {
 	genstring tmp;
 	size_t i;
@@ -104,7 +104,7 @@ bool CSpeedKernel::ReadEspReport(genstring& r, TargetInfo& TargetData)
 	if(f != genstring::npos && f2 != genstring::npos)
 	{
         genstring tmp2 = tmp.substr(f + m_Spiostrings[0].length(), f2 - f - m_Spiostrings[0].length()+1);
-        tmp.erase(f + m_Spiostrings[0].length(), f2 - f - 3);
+        tmp.erase(0, f2);
         genstring::size_type f3 = tmp2.rfind(_T("["));
         genstring name = tmp2.substr(0, f3 - 1);
         _tcsncpy(ti.Name, name.c_str(), 63);
@@ -123,8 +123,6 @@ bool CSpeedKernel::ReadEspReport(genstring& r, TargetInfo& TargetData)
                 pos = true;
         }
 	}
-    if(f2 != genstring::npos)
-        tmp.erase(0, f2);
 
     // remove unimportant characters
 	i = 0;
@@ -343,13 +341,17 @@ bool CSpeedKernel::ReadOverview(const genstring& s, int FleetID)
 }
 
 // reads defense and own fleet
-bool CSpeedKernel::ReadOwnFleet(const genstring &OwnFleet, int FleetID) {
+bool CSpeedKernel::ReadOwnFleet(genstring OwnFleet, int FleetID) {
     vector<SItem> items;
     vector<SItem> def;
     bool dodef = false;
 	genstring name, anz, name2;
     genstring::size_type f;
     int i, num = 0;
+    while((f = OwnFleet.find(_T("."))) != genstring::npos)
+    {
+        OwnFleet.erase(f, 1);
+    }
 
     // fleet from fleet menu
     for(i = 0; i < T_SHIPEND; i++) {
@@ -589,10 +591,10 @@ bool CSpeedKernel::ReadCRTable(genstring Table, vector<SItem> &Fleet, ShipTechs&
         return false;
 
     // 'collect' unit types in correct order
-    while(f < f2-1) {
+    while(f < f2) {
         f3 = Table.find(_T(' '), f);
         if(f3 > f2)
-            f3 = Table.find(_T('\n'), f );
+            f3 = Table.find(_T('\n'), f);
         genstring tmp2 = Table.substr(f, f3-f);
         tmp_SItem.Type = GetItemType(tmp2);
         Fleet.push_back(tmp_SItem);
@@ -612,12 +614,16 @@ bool CSpeedKernel::ReadCRTable(genstring Table, vector<SItem> &Fleet, ShipTechs&
 
     int n = 0;
     // get number of units of different types
-    while(f < f2-1 && f < Table.length()) {
+    while(f < f2 && f < Table.length())
+    {
         f3 = Table.find(_T(' '), f+1);
         if(f3 == genstring::npos)
             f3 = Table.length();
         anz = Table.substr(f, f3-f);
-        Fleet[n++].Num = _ttoi(anz.c_str());
+        if(n < Fleet.size())
+            Fleet[n++].Num = _ttoi(anz.c_str());
+        else
+            break;
         f = f3 + 1;
     }
     // try to calculate the technologies from the table, if needed

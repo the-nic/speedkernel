@@ -83,10 +83,6 @@ void CSpeedKernel::GetSpeed(int &perc_speed, int &v, int &i, int &h, int FleetID
     h = m_TechsTW[FleetID][2];
 }
 
-void CSpeedKernel::SetNewShield(bool really) {
-    m_NewShield = really;
-}
-
 void CSpeedKernel::SetRF(RFTYPE ver)
 {
     switch(ver) {

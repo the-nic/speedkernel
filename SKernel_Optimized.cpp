@@ -36,6 +36,7 @@ const BattleResult& CSpeedKernel::OptimizedSimulate(int count, const vector<SIte
     float DamFak_v = (10 + techDef[0]) / 10.0f;
     float ShFak_v = (10 + techDef[1]) / 10.0f;
     float LifeFak_v = (10 + techDef[2]) / 10.0f;
+
     
     for(i = 0; i < T_END; i++)
     {
@@ -273,13 +274,13 @@ void CSpeedKernel::OptimizedShipShoots(Obj& o, int Team)
         }
 
         obj = &(*treffer)[Ziel];
-        if(obj->Shield) {
+        if(Dam < obj->Shield) {
             // new shield usage
-            if(100 * Dam / MaxShields[DefferID][ZielTeam][obj->Type] < 1) {
-                // if damage < 1% of shield, set damage to 0
-                Dam = 0;
-                Dam2 = Dam;
-            }
+            float perc = floor(100.0f * Dam / MaxShields[DefferID][ZielTeam][obj->Type]);
+            Dam = MaxShields[DefferID][ZielTeam][obj->Type] * perc;
+            Dam /= 100.0f;
+            
+            Dam2 = Dam;
         }
 		if(obj->Shield <= 0 || Dam > 0)
 		{
@@ -310,76 +311,18 @@ void CSpeedKernel::OptimizedShipShoots(Obj& o, int Team)
 			}
 		}
 		// can shoot this at ship again?
-		ShootsAgain = CanShootAgain_Optimized(o.Type, obj->Type);
+		ShootsAgain = CanShootAgain(o.Type, obj->Type);
 	}
 	return;
 
-}
-
-bool CSpeedKernel::CanShootAgain_Optimized(ITEM_TYPE AttType, ITEM_TYPE TargetType)
-{
-    // uses RF-v065a
-    if(AttType == T_TS)
-	{
-		if(TargetType == T_TS || TargetType == T_PLASMA || TargetType == T_KS || TargetType == T_GS)
-			return false;
-        if(TargetType == T_RAK || TargetType == T_LL || TargetType == T_LJ)
-            return RandomNumber(1000) >= 5; // RF (200)
-        if(TargetType == T_SL || TargetType == T_IONEN || TargetType == T_SJ)
-            return rand() % 100 >= 1;       // RF(100)
-        if(TargetType == T_GAUSS)
-            return rand() % 100 >= 2;       // RF(50)
-        if(TargetType == T_KREUZER)
-            return RandomNumber(10000) >= 303;  // RF(33)
-        if(TargetType == T_SS)
-            return RandomNumber(10000) >= 333;  // RF(30)
-        if(TargetType == T_BOMBER)
-            return rand() % 100 >= 4;       // RF(25)
-        if(TargetType == T_ZER)
-            return rand() % 100 >= 20;      // RF(5)
-        // other ships
-        return RandomNumber(1000) >= 4;     // RF(250)
-	}
-    if((TargetType == T_SPIO || TargetType == T_SAT) && AttType != T_SPIO && AttType < T_SHIPEND)
-		return rand() % 100 >= 20;		    // RF(5)
-
-	if(AttType == T_KREUZER)
-	{
-		if(TargetType == T_LJ)
-			return rand() % 100 >= 33;	    // RF(3)
-		
-		if(TargetType == T_RAK)
-			return rand() % 100 >= 10;	    // RF(10)
-
-		return false;
-	}
-
-	if(AttType == T_ZER)
-	{
-		if(TargetType == T_LL)
-			return rand() % 100 >= 10;	    // RF(10)
-
-		return false;
-	}
-
-	if(AttType == T_BOMBER)
-	{
-		if(TargetType == T_LL || TargetType == T_RAK)
-			return rand() % 100 >= 5;	    // RF(20)
-		if(TargetType == T_SL || TargetType == T_IONEN)
-			return rand() % 100 >= 10;	    // RF(10)
-
-		return false;
-	}
-
-	return false;
 }
 
 void CSpeedKernel::InitOptimized()
 {
     ComputeShipData();
     InitRand();
-    srand(time(NULL)); 
+    srand(time(NULL));
+    SetRF(RF_075);
 }
 
 void CSpeedKernel::OptimizedComputeLosses()
