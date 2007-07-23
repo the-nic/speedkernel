@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8,00"
 	Name="SpeedKernel"
-	ProjectGUID="{97921CD0-2A6A-4CE0-B3AD-E796A13377D1}"
+	ProjectGUID="{74A78E5A-6FD9-4886-9830-5B7C45C7CD5C}"
 	RootNamespace="SpeedKernel"
 	>
 	<Platforms>

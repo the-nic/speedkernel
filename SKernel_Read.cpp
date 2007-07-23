@@ -57,9 +57,11 @@ int CSpeedKernel::MultiReadEspReport(genstring reports, TargetInfo* TIs, int nMa
         reports.erase(0, f + m_EspLimiter.length());
         f = reports.find(m_EspLimiter);
     }
-    // set first espionage report
-    if(nEsp)
-        SetTargetInfo(TIs[0], 0);
+    if(nMaxTI && !nEsp)
+    {
+        if(ReadEspReport(reports, TIs[0]))
+            nEsp = 1;
+    }
     return nEsp;
 }
 
@@ -202,6 +204,8 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
         ti.Resources.met = _ttoi(anz.c_str());
         if(ti.Resources.met)
             founditem = true;
+        if(ti.Resources.met < 0)
+            ti.Resources.met = 0;
     }
     if(((f2 = s.find(m_Ress[1], 0)) != s.npos) && s.find(m_wrongRess[1], 0) != f2 && s.find(m_wrongRess2[1], 0) != f2)
     {
@@ -210,6 +214,8 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
         ti.Resources.kris = _ttoi(anz.c_str());
         if(ti.Resources.kris)
             founditem = true;
+        if(ti.Resources.kris < 0)
+            ti.Resources.met = 0;
     }
     if(((f2 = s.find(m_Ress[2], 0)) != s.npos) && s.find(m_wrongRess[2], 0) != f2 && s.find(m_wrongRess2[2], 0) != f2)
     {
@@ -218,6 +224,8 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
         ti.Resources.deut = _ttoi(anz.c_str());
         if(ti.Resources.deut)
             founditem = true;
+        if(ti.Resources.deut< 0)
+            ti.Resources.deut = 0;
     }
 
     // read in defense and fleet

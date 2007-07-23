@@ -181,3 +181,8 @@ void CSpeedKernel::SetCSSFiles(TCHAR* cr_css, TCHAR* bwc_css)
     else
         m_BWC_CSS = _T("bwc.css");
 }
+
+void CSpeedKernel::UseOldBattleShip(bool use)
+{
+    m_UseOldBS = use;
+}

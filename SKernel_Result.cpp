@@ -735,6 +735,7 @@ void CSpeedKernel::ComputeBattleResult()
 	m_Result.GewinnMitHalfTF_def.deut = -m_Result.Beute.deut - m_Result.VerlVertmitAufbau.deut;
     m_Result.GewinnMitTF_def = m_Result.TF - m_Result.Beute - m_Result.VerlVertmitAufbau;
 	m_Result.GewinnMitTF_def.deut = -m_Result.Beute.deut - m_Result.VerlVertmitAufbau.deut;
+    m_Result.TotalFuel = m_Waves.TotalFuel + m_Result.SpritVerbrauch;
 }
 
 void CSpeedKernel::ComputeLosses()

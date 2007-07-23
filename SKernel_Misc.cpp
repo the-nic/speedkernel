@@ -161,7 +161,10 @@ void CSpeedKernel::ComputeShipData()
         Kosten[T_LJ] = Res(3000, 1000);
         Kosten[T_SJ] = Res(6000, 4000);
         Kosten[T_KREUZER] = Res(20000, 7000, 2000);
-        Kosten[T_SS] = Res(45000, 15000);
+        if(!m_UseOldBS)
+            Kosten[T_SS] = Res(45000, 15000);
+        else
+            Kosten[T_SS] = Res(40000, 20000);
         Kosten[T_KOLO] = Res(10000, 20000, 10000);
         Kosten[T_REC] = Res(10000, 6000, 2000);
         Kosten[T_SPIO] = Res(0, 1000);
@@ -535,6 +538,7 @@ void CSpeedKernel::SetRemainingItemsInDef(REBUILD_OPTION opt)
     m_Waves.TotalRecs = m_Result.GesamtRecs;
     m_Waves.TotalDebris = m_Result.GesTF;
     m_Waves.TotalLosses = m_Result.GesVerlust;
+    m_Waves.TotalFuel = m_Result.TotalFuel;
 }
 
 TCHAR* CSpeedKernel::AddPointsToNumber(__int64 value, TCHAR* out)

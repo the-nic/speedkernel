@@ -297,6 +297,15 @@ struct SPEEDKERNEL_API PlaniPos
         c << Gala << _T(":") << Sys << _T(":") << Pos;
         return c.str();
     };
+    //! compares two positions
+    bool operator==(const PlaniPos p) const
+    {
+        return Gala == p.Gala && Sys == p.Sys && Pos == p.Pos && bMoon == p.bMoon;
+    };
+    bool operator!=(const PlaniPos p) const
+    {
+        return !(p == *this);
+    }
 };
 
 /*!
@@ -385,6 +394,7 @@ struct SPEEDKERNEL_API BattleResult
     int RecFlyTime[MAX_PLAYERS_PER_TEAM];
     //! recyler fuel usage
     int RecFuel[MAX_PLAYERS_PER_TEAM];
+    int TotalFuel;
 
     BattleResult()
     {
@@ -397,6 +407,7 @@ struct SPEEDKERNEL_API BattleResult
         PercentInTFKris = PercentInTFMet = 0;
         NumRecs = MaxNumRecs = MinNumRecs = GesamtRecs = 0;
         NumRounds = NumAtts = Ausbeute = SpritVerbrauch = FlyTime = iNeededCapacity = 0;
+        TotalFuel = 0;
         for(int i = 0; i < MAX_PLAYERS_PER_TEAM; i++)
         {
             RecFlyTime[i] = 0;
@@ -506,9 +517,11 @@ struct SPEEDKERNEL_API WaveInfo
     Res TotalDebris;
     //! Total own losses
     Res TotalLosses;
+    //! all needed fuel
+    int TotalFuel;
 
     WaveInfo() {
-        NumAtts = TotalRecs = 0;
+        TotalFuel = NumAtts = TotalRecs = 0;
         TotalPlunder = TotalDebris = TotalLosses = Res();
     }
 };

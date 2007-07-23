@@ -237,6 +237,9 @@ public:
     */
 	void SetCallBack(void (*f)(int sim, int round));
 
+    //! Enables/Disables the old battleship - works only, if no ship data is loaded
+    void UseOldBattleShip(bool use);
+
     //! Sets whether destroyed defense units go into debris
 	void SetDefInDebris(bool really);
     //! sets the RF used in the simulation
@@ -516,6 +519,7 @@ private:
     bool m_InitSim;
     bool m_LastScanHadTechs;
     bool m_BracketNames;
+    bool m_UseOldBS;
 
     float m_DefRebuildFac;
     bool m_ShipDataFromFile;
