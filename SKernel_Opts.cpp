@@ -34,10 +34,6 @@ void CSpeedKernel::RebuildSmallDefense(bool bRebuild) {
     m_RebuildSmallDef = bRebuild;
 }
 
-void CSpeedKernel::SetNewFuel(bool bNewFuel) {
-    m_NewFuel = bNewFuel;
-}
-
 void CSpeedKernel::SetDefRebuildFactor(float RebuildFac) {
     m_DefRebuildFac = RebuildFac;
 }

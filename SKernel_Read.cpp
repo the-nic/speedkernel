@@ -176,11 +176,16 @@ bool CSpeedKernel::ReadEspReport(genstring r, TargetInfo& TargetData)
 
     if(!ParseSpioLine(tmp, ti))
         return false;
-    // check, if esp. report is from moon
-    if(tmp.find(m_Spiostrings[3]) != genstring::npos && m_Spiostrings[3] != _T(""))
+
+    genstring tmp2 = ti.Name;
+    if(tmp2.find(_T("(")) != genstring::npos && tmp2.find(_T(")")) != genstring::npos)
         ti.Pos.bMoon = true;
     else
         ti.Pos.bMoon = false;
+
+    // check, if esp. report is from moon
+    if(tmp.find(m_Spiostrings[3]) != genstring::npos && m_Spiostrings[3] != _T(""))
+        ti.Pos.bMoon = true;
 
     TargetData = ti;
     return true;
@@ -232,43 +237,59 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
     SItem sit;
     sit.OwnerID = 0;
     int num = 0;
-    for(int i = 0; i <= T_END; i++)
+    int i;
+    bool found_ship[T_END];
+    for(i = 0; i < T_END; i++)
     {
-        item = ItemName((ITEM_TYPE)i);
-        item2 = ItemName2((ITEM_TYPE)i);
+        ITEM_TYPE type = m_ParseOrder[0][i];
+        item = ItemName(type);
+        /*item2 = ItemName2((ITEM_TYPE)i);*/
         sit.Num = 0;
         if((f2 = s.find(item.c_str(), 0)) != genstring::npos)
         {
-            f = f2 + item.length() + 1;
-            anz = s.substr(f-1);
-            ITEM_TYPE type = GetItemType(item);
-            if(type != T_NONE) {
-                sit.Type = type;
-                num += sit.Num = _ttoi(anz.c_str());
-                if(type < T_SHIPEND)
-                    ti.Fleet.push_back(sit);
-                else if(type < T_END)
-                    ti.Defence.push_back(sit);
-                else
-                    ti.NumABM = sit.Num;
-            }
+            anz = s.substr(f2 + item.length());
+            //ITEM_TYPE type = GetItemType(item);
+            sit.Type = type;
+            num += sit.Num = _ttoi(anz.c_str());
+            if(type < T_SHIPEND && sit.Num != 0)
+                ti.Fleet.push_back(sit);
+            else if(type < T_END && sit.Num != 0)
+                ti.Defence.push_back(sit);
+            else
+                ti.NumABM = sit.Num;
+            // substitute name
+            s.replace(f2, item.length(), _T("_"));
         }
-        // if number if items found zero, try second name
-        if((f2 == genstring::npos || sit.Num == 0) && (f2 = s.find(item2.c_str(), 0)) != genstring::npos && item2 != _T(""))
+        if(sit.Num)
+            found_ship[type] = true;
+        else
+            found_ship[type] = false;
+    }
+    for(i = 0; i < T_END; i++)
+    {
+        ITEM_TYPE type = m_ParseOrder[1][i];
+        if(found_ship[type])
+            continue;
+
+        item = ItemName2(type);
+        sit.Num = 0;
+        if((f2 = s.find(item.c_str(), 0)) != genstring::npos)
         {
-            f = f2 + item2.length() + 1;
-            anz = s.substr(f-1);
-            ITEM_TYPE type = GetItemType(item2);
-            if(type != T_NONE) {
-                sit.Type = type;
-                num += sit.Num = _ttoi(anz.c_str());
-                if(type < T_SHIPEND)
-                    ti.Fleet.push_back(sit);
-                else
-                    ti.Defence.push_back(sit);
-            }
+            anz = s.substr(f2 + item.length());
+            sit.Type = type;
+            num += sit.Num = _ttoi(anz.c_str());
+            if(type < T_SHIPEND && sit.Num != 0)
+                ti.Fleet.push_back(sit);
+            else if(type < T_END && sit.Num != 0)
+                ti.Defence.push_back(sit);
+            else
+                ti.NumABM = sit.Num;
+            // substitute name
+            s.replace(f2, item.length(), _T("_"));
         }
     }
+    sort(ti.Fleet.begin(), ti.Fleet.end(), SItem::IsLess);
+    sort(ti.Defence.begin(), ti.Defence.end(), SItem::IsLess);
     // read in techs
     for(int j = 0; j < 3; j++) {
         if((f2 = s.find(m_TechNames[j], 0)) != genstring::npos)

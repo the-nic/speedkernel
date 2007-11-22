@@ -294,6 +294,12 @@ bool CSpeedKernel::Simulate(int count)
 		(*m_DefObj) = Def;
 		for(round = 1; round < 7; round++)
 		{
+            if(m_DataIsDeleted)
+            {
+                aborted = true;
+                break;
+            }
+
 			if(m_FuncPtr)
 				m_FuncPtr(num + 1, round);
 
@@ -302,11 +308,6 @@ bool CSpeedKernel::Simulate(int count)
 
 			m_CurrentRound = round - 1;
 
-			if(m_DataIsDeleted)
-			{
-				aborted = true;
-				break;
-			}
 			// maximize all shields
 			MaxAllShields();
 			// make every ship shoot
@@ -316,21 +317,11 @@ bool CSpeedKernel::Simulate(int count)
 				ShipShoots((*m_AttObj)[i], ATTER, (*m_AttObj)[i].PlayerID);
 			}
 
-			if(m_DataIsDeleted)
-			{
-				aborted = true;
-				break;
-			}
 			for(i = 0; i < m_DefObj->size(); i++)
 			{
 				ShipShoots((*m_DefObj)[i], DEFFER, (*m_DefObj)[i].PlayerID);
 			}
 
-			if(m_DataIsDeleted)
-			{
-				aborted = true;
-				break;
-			}
 			// remove destroyed ships, calculate loss and debris
 			DestroyExplodedShips();
 
@@ -339,12 +330,6 @@ bool CSpeedKernel::Simulate(int count)
 			{
 				SaveShipsToCR(round+1);
 
-				// count left ships
-				if(m_DataIsDeleted)
-				{
-					aborted = true;
-					break;
-				}
 				for(i = 0; i < m_AttObj->size(); i++)
 				{
 					ITEM_TYPE it = (*m_AttObj)[i].Type;
@@ -375,13 +360,15 @@ bool CSpeedKernel::Simulate(int count)
 				break;
 			}
 		}
+        if(aborted)
+        {
+            break;
+        }
 		m_Result.NumRounds += (round > 6 ? 6 : round);
-		if(aborted)
-			break;
 	}
     Att.clear();
     Def.clear();
-    m_SimulateFreedItsData = true;
+    
     m_CurrentSim = 0;
     
     if(!num && aborted)
@@ -397,7 +384,6 @@ bool CSpeedKernel::Simulate(int count)
         m_CombatResultsAtt.resize(num);
         m_CombatResultsDef.resize(num);
 #endif
-        m_Result.NumRounds -= round;
     }
 
 	// battle result is added permanently added during multiple simulation
@@ -418,6 +404,8 @@ bool CSpeedKernel::Simulate(int count)
 
     // calculation of combat report
 	ComputeBattleResult();
+
+    m_SimulateFreedItsData = true;
 #ifdef PROFILING
     ofstream aus("prof.txt");
     CProfiler::GetInst().GetResults(aus);
@@ -1107,7 +1095,7 @@ void CSpeedKernel::SendStopSim()
 
 bool CSpeedKernel::IsSimulating()
 {
-    return m_SimulateFreedItsData;
+    return !m_SimulateFreedItsData;
 }
 
 
@@ -1173,10 +1161,7 @@ IPMBattleResult CSpeedKernel::SimulateIPM(int NumIPM, int NumABM, int FleetID, I
             m_NumShipsDef.push_back(m_NumSetShipsDef[i]);
     }
 
-    Res LossesAttacker, LossesDefender;
-
     int MaxDam = (int)(NumIPM * 12000 * (1 + m_TechsAtt[FleetID].Weapon / 10.f));
-    int MaxDam2 = MaxDam;
     for (i = 0; i < T_END - T_SHIPEND; i++)
     {
         unsigned int target;

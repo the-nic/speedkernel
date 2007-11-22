@@ -227,7 +227,6 @@ void CSpeedKernel::ComputeShipData()
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_PLASMA] = 3000;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_KS] = 1;
         Dams[MAX_PLAYERS_PER_TEAM][ATTER][T_GS] = 1;
-
     }
     int i;
     for(i = 0; i < T_END; i++)
@@ -570,7 +569,7 @@ TCHAR* CSpeedKernel::AddPointsToNumber(__int64 value, TCHAR* out)
         quot--;
     for(i = 1; i <= quot; i++)
     {
-        c.insert(l - i * 4 + 1, _T("."));
+        c.insert(l - i * 4 + 1, m_ThousandSep);
         l++;
     }
     if(neg)
@@ -747,6 +746,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
 		m_Bilanzstrings[2] = _T("Bei Einsammeln des halben TF");
 		m_Bilanzstrings[3] = _T("Bei Einsammeln des gesamten TF");
         m_BracketNames = false;
+        SetParseOrder();
         return true;
     }
     CIniFile iniFile(langfile);
@@ -931,7 +931,8 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
     iniFile.GetLong(i, _T("ReadStrings"), _T("BRACKET_NAMES"));
     if(i)
         m_BracketNames = true;
-
+    
+    SetParseOrder();
     return true;
 }
 
@@ -1118,5 +1119,32 @@ void CSpeedKernel::FillRFTable(RFTYPE rfType)
             m_RF[T_IC][T_SS] = 1429;
         }
         break;
+    }
+}
+
+void CSpeedKernel::SetParseOrder()
+{
+    vector<ShipString> tmp_list[2];
+    int i = 0;
+
+    // get all lengths of ship names
+    for(; i < T_END; i++)
+    {
+        ShipString s;
+        s.Item = (ITEM_TYPE)i;
+        s.Length = m_FleetNames[i].length();
+        tmp_list[0].push_back(s);
+        s.Length = m_altFleetNames[i].length();
+        tmp_list[1].push_back(s);
+    }
+    // sort them descending
+    sort(tmp_list[0].begin(), tmp_list[0].end(), ShipString::IsLess);
+    sort(tmp_list[1].begin(), tmp_list[1].end(), ShipString::IsLess);
+    m_ParseOrder[0].resize(T_END);
+    m_ParseOrder[1].resize(T_END);
+    for(i = 0; i < T_END; i++)
+    {
+        m_ParseOrder[0][i] = tmp_list[0][i].Item;
+        m_ParseOrder[1][i] = tmp_list[1][i].Item;
     }
 }

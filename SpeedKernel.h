@@ -24,13 +24,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #pragma once
 
 #include <vector>
-#include <ctime>
 #include <string>
 #include <sstream>
-#include <cmath>
 #include <algorithm>
 #include <map>
-#include <stdarg.h>
+
+#include <cmath>
+#include <ctime>
+#include <cstdarg>
+#include <clocale>
 
 using namespace std;
 
@@ -244,8 +246,6 @@ public:
 	void SetDefInDebris(bool really);
     //! sets the RF used in the simulation
 	void SetRF(RFTYPE ver);
-    //! Use new fuel calculation (OGame > v0.68a
-    void SetNewFuel(bool bNewFuel);
     //! Sets the factor how many defense units will be rebuilt in SetRemainingItemsInDef
     /*! \sa SetRemainingItemsInDef() */
 	void SetDefRebuildFactor(float RebuildFac);
@@ -470,6 +470,8 @@ private:
     static bool CantShootAgain(ITEM_TYPE AttType, ITEM_TYPE ZielType);
 
     void FillRFTable(RFTYPE rfType);
+    
+    void SetParseOrder();
 
 	// pointer to function which outputs number of rounds and simulations
     void (*m_FuncPtr)(int sim, int round);
@@ -510,7 +512,6 @@ private:
     WaveInfo m_Waves;
 
 	bool m_DefInTF;
-    bool m_NewFuel;
 	bool m_CompBestWorstCase;
     bool m_RebuildSmallDef;
 
@@ -564,6 +565,8 @@ private:
     // Charset for correct output
     genstring m_HTML_Charset;
 
+    genstring m_ThousandSep;
+
     genstring m_BWC_CSS, m_CR_CSS;
 
 	genstring m_Bilanzstrings[10];
@@ -580,6 +583,9 @@ private:
     TargetInfo m_DefenderInfos[MAX_PLAYERS_PER_TEAM];
     // needed for waves
     TargetInfo m_LastReadTarget;
+
+    // parsing order of normal and alternative ship names
+    vector<ITEM_TYPE> m_ParseOrder[2];
 
 	ShipTechs m_TechsAtt[MAX_PLAYERS_PER_TEAM];
 	ShipTechs m_TechsDef[MAX_PLAYERS_PER_TEAM];

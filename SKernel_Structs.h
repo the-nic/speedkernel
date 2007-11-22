@@ -137,6 +137,7 @@ struct SPEEDKERNEL_API SItem
         Num = Number;
         OwnerID = FleetID;
     }
+    static bool IsLess(const SItem& r1, const SItem& r2) { return (int)r1.Type < (int)r2.Type; }
 };
 
 /*!
@@ -561,6 +562,8 @@ struct SPEEDKERNEL_API TargetInfo
     ReportData State;
     //! engines
     int Engines[3];
+    //! fleet velocity in percent
+    int FleetVelocity;
 
     TargetInfo()
     {
@@ -571,6 +574,7 @@ struct SPEEDKERNEL_API TargetInfo
         Techs = ShipTechs();
         State = REPORT_RES;
         NumABM = 0;
+        FleetVelocity = 100;
     }
     const TargetInfo& operator=(const TargetInfo& ti)
     {
@@ -585,7 +589,20 @@ struct SPEEDKERNEL_API TargetInfo
         State = ti.State;
         Pos = ti.Pos;
         NumABM = ti.NumABM;
+        FleetVelocity = ti.FleetVelocity;
         return *this;
+    }
+};
+
+//! Help structure to get parse order
+struct ShipString
+{
+    genstring::size_type Length;
+    ITEM_TYPE Item;
+    // needed to get right sort order
+    static bool IsLess(ShipString const& s1, ShipString const& s2)
+    {
+        return s1.Length > s2.Length;
     }
 };
 

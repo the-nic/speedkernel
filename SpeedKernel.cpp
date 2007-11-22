@@ -74,7 +74,6 @@ CSpeedKernel::CSpeedKernel()
     LoadLangFile(NULL);
 	// set to newest version
     CanShootAgain = CanShootAgain_V065;
-    m_NewFuel = true;
     m_DefRebuildFac = DEF_AUFBAU_FAKTOR;
     m_LastScanHadTechs = false;
     m_ShipDataFromFile = false;
@@ -135,6 +134,17 @@ CSpeedKernel::CSpeedKernel()
 
     m_BWC_CSS = _T("bwc.css");
     m_CR_CSS = _T("cr.css");
+
+    setlocale(LC_ALL, "");
+
+    lconv *lc = localeconv();
+    TCHAR ts[10];
+#ifdef UNICODE
+    mbstowcs(ts, lc->thousands_sep, 10);
+#else
+    strncpy(ts, lc->thousands_sep, 10);
+#endif
+    m_ThousandSep = genstring(ts);
 
 	return;
 }
