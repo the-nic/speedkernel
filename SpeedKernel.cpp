@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2008 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -21,18 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "SpeedKernel.h"
 
 
-CSpeedKernel& CSpeedKernel::GetInstance()
-{
-    static CSpeedKernel inst;
-    return inst;
-}
-
-CSpeedKernel& CSpeedKernel::ForceNewInstance()
-{
-    CSpeedKernel* sk = new CSpeedKernel;
-    return *sk;
-}
-
 CSpeedKernel::CSpeedKernel()
 {
     int r;
@@ -48,6 +36,7 @@ CSpeedKernel::CSpeedKernel()
 	m_Result.GesamtBeute = Res();
 	m_Result.NumAtts = 0;
     m_Result.GesamtRecs = 0;
+    m_LossesToDF = 30;
     for(r = 0; r < MAX_PLAYERS_PER_TEAM; r++)
         m_Speed[r] = 10;
 
@@ -73,7 +62,7 @@ CSpeedKernel::CSpeedKernel()
 	m_SimulateFreedItsData = true;
     LoadLangFile(NULL);
 	// set to newest version
-    CanShootAgain = CanShootAgain_V065;
+    FillRFTable(RF_075);
     m_DefRebuildFac = DEF_AUFBAU_FAKTOR;
     m_LastScanHadTechs = false;
     m_ShipDataFromFile = false;
@@ -179,10 +168,10 @@ void CSpeedKernel::Reset()
 	memset(m_TechsAtt, 0, MAX_PLAYERS_PER_TEAM * sizeof(ShipTechs));
 	memset(m_TechsDef, 0, MAX_PLAYERS_PER_TEAM * sizeof(ShipTechs));
 	memset(&m_Result, 0, sizeof(BattleResult));
-    CanShootAgain = CanShootAgain_V065;
-    ComputeShipData();
+    FillRFTable(RF_075);
     m_NumPlayersPerTeam[ATTER] = 0;
     m_NumPlayersPerTeam[DEFFER] = 0;
+    m_LossesToDF = 30;
 
     srand((unsigned)time(NULL));
     InitRand();

@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2008 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,12 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
         
         Ships during simulation:
             void ShipShoots(Obj& o, int Team, DWORD AtterID);
-            bool CanShootAgain_User(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-            bool CanShootAgain_V058(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-            bool CanShootAgain_V059(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-            bool CanShootAgain_V062(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-            bool CanShootAgain_V065(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-            bool CantShootAgain(ITEM_TYPE AttType, ITEM_TYPE ZielType);
+            bool CanShootAgain_FromTable(ITEM_TYPE AttType, ITEM_TYPE ZielType);
             
             void DestroyExplodedShips();
             void ShipsDontExplode();
@@ -502,8 +497,8 @@ void CSpeedKernel::ShipShoots(Obj& o, int Team, DWORD AtterID)
 	int ZielTeam = Team == ATTER ? DEFFER : ATTER;
     DWORD DefferID = 0;
 	
-	float Dam = Dams[AtterID][Team][o.Type];
-	float Dam2 = Dam;	
+	double Dam = Dams[AtterID][Team][o.Type];
+	double Dam2 = Dam;	
 
 	Obj* obj;
 	
@@ -538,11 +533,12 @@ void CSpeedKernel::ShipShoots(Obj& o, int Team, DWORD AtterID)
 		}
 
         obj = &(*treffer)[Ziel];
+        double max_shield = MaxShields[DefferID][ZielTeam][obj->Type];
         if(Dam < obj->Shield)
         {
             // round damage down to full percents
-            float perc = floor(100.0f * Dam / MaxShields[DefferID][ZielTeam][obj->Type]);
-            Dam = MaxShields[DefferID][ZielTeam][obj->Type] * perc;
+            double perc = floor(100.0f * Dam / max_shield);
+            Dam = max_shield * perc;
             Dam /= 100.0f;
             
             Dam2 = Dam;
@@ -559,7 +555,7 @@ void CSpeedKernel::ShipShoots(Obj& o, int Team, DWORD AtterID)
 		{
 			Dam = 0;
 		}
-		float absorbed = Dams[AtterID][Team][o.Type] - Dam;
+		double absorbed = Dams[AtterID][Team][o.Type] - Dam;
 		// absorbed damage (for combat reports)
         if(Team == ATTER)
 			m_AbsorbedDef[m_CurrentRound] += absorbed;
@@ -583,257 +579,14 @@ void CSpeedKernel::ShipShoots(Obj& o, int Team, DWORD AtterID)
                 obj->Explodes = true;
         }
 		// can shoot this at ship again?
-		ShootsAgain = CanShootAgain(o.Type, obj->Type);
+		ShootsAgain = CanShootAgain_FromTable(o.Type, obj->Type);
 	}
 	return;
 }
 
-
-// lets shoot a ship again with a certain chance
-bool CSpeedKernel::CanShootAgain_V059(ITEM_TYPE AttType, ITEM_TYPE ZielType)
-{
-
-    PR_PROF_FUNC(F_CSA_059);
-
-	if(AttType == T_TS)
-	{
-		if(ZielType == T_SPIO || ZielType == T_SAT)
-            // 99,92% RF against probes RF(1250)
-            return CSpeedKernel::GetInstance().RandomNumber(10000) >= 8;
-        if(ZielType == T_ZER)
-			return rand() % 10 >= 2;	// 90% RF gegen Zerstörer RF(5)
-		if(ZielType == T_TS || ZielType == T_PLASMA || ZielType == T_KS || ZielType == T_GS)
-			return false;
-        if(ZielType < T_SHIPEND)
-			// Gegen Flotten
-            // RF(33) (96,97%)
-            return CSpeedKernel::GetInstance().RandomNumber(10000) >= 302;
-
-		if(ZielType >= T_SHIPEND)
-			// RF(250) (99,6%) gegen def
-            return CSpeedKernel::GetInstance().RandomNumber(1000) >= 4;
-            
-	}
-		
-	if(ZielType == T_SPIO && AttType != T_SPIO)
-		return rand() % 100 >= 10;		// Alle Einheiten (außer Spionagesonde) 80% Rf gegen Spionagesonden
-	
-	if(ZielType == T_SAT)
-		return rand() % 100 >= 20;		// Alle Einheiten 80% Rf gegen Sats
-
-	if(AttType == T_KREUZER)
-	{
-		if(ZielType == T_LJ)
-			return rand() % 100 >= 33;	// 67% RF gegen Leichte Jäger
-		
-		if(ZielType == T_RAK)
-			return rand() % 100 >= 10;	// 90% RF gegen Raks
-
-		return false;
-	}
-
-	if(AttType == T_ZER)
-	{
-		if(ZielType == T_LL)
-			return rand() % 100 >= 10;	// 90% RF gegen Leichte Laser
-
-		return false;
-	}
-
-	if(AttType == T_BOMBER)
-	{
-		if(ZielType == T_LL || ZielType == T_RAK)
-			return rand() % 100 >= 10;	// 90% Rf gegen Raketenwerfer und Leichte Laser
-		if(ZielType == T_SL || ZielType == T_IONEN)
-			return rand() % 100 >= 20;	// 90% Rf gegen IOnengeschütze und Schwere Laser
-
-		return false;
-	}
-
-	return false;
-}
-
-bool CSpeedKernel::CanShootAgain_V058(ITEM_TYPE AttType, ITEM_TYPE ZielType)
-{
-	PR_PROF_FUNC(F_CSA_058);
-    
-    if(AttType == T_TS)
-	{
-		if(ZielType == T_TS || ZielType == T_PLASMA || ZielType == T_KS || ZielType == T_GS)
-			return false;
-		
-		if(ZielType == T_ZER)
-			return rand() % 100 >= 10;		// 90% RF gegen Zerris
-        //return rand() % 10000 >= 16;
-        return CSpeedKernel::GetInstance().RandomNumber(10000) >= 20;
-	}
-		
-	if(ZielType == T_SPIO && AttType != T_SPIO)
-		return rand() % 100 >= 10;		// Alle Einheiten (außer Spionagesonde) 80% Rf gegen Spionagesonden
-	
-	if(ZielType == T_SAT)
-		return rand() % 100 >= 20;		// Alle Einheiten 80% Rf gegen Sats
-
-	if(AttType == T_KREUZER)
-	{
-		if(ZielType == T_LJ)
-			return rand() % 100 >= 33;	// 67% RF gegen Leichte Jäger
-		
-		if(ZielType == T_RAK)
-			return rand() % 100 >= 10;	// 90% RF gegen Raks
-
-		return false;
-	}
-
-	if(AttType == T_ZER)
-	{
-		if(ZielType == T_LL)
-			return rand() % 100 >= 10;	// 90% RF gegen Leichte Laser
-
-		return false;
-	}
-
-	if(AttType == T_BOMBER)
-	{
-		if(ZielType == T_LL || ZielType == T_RAK)
-			return rand() % 100 >= 10;	// 90% Rf gegen Raketenwerfer und Leichte Laser
-		if(ZielType == T_SL || ZielType == T_IONEN)
-			return rand() % 100 >= 20;	// 90% Rf gegen IOnengeschütze und Schwere Laser
-
-		return false;
-	}
-
-	return false;
-}
-
-bool CSpeedKernel::CanShootAgain_V062(ITEM_TYPE AttType, ITEM_TYPE ZielType)
-{
-    PR_PROF_FUNC(F_CSA_062);
-
-	if(AttType == T_TS)
-	{
-        // aufgrund des Bugs RF halbieren
-		if(ZielType == T_TS || ZielType == T_PLASMA || ZielType == T_KS || ZielType == T_GS)
-			return false;
-		
-		if(ZielType == T_ZER)
-			return rand() % 100 >= 10;
-        return CSpeedKernel::GetInstance().RandomNumber(10000) >= 40;
-	}
-		
-	if(ZielType == T_SPIO && AttType != T_SPIO)
-		return rand() % 100 >= 10;		// Alle Einheiten (außer Spionagesonde) 80% Rf gegen Spionagesonden
-	
-	if(ZielType == T_SAT)
-		return rand() % 100 >= 20;		// Alle Einheiten 80% Rf gegen Sats
-
-	if(AttType == T_KREUZER)
-	{
-		if(ZielType == T_LJ)
-			return rand() % 100 >= 33;	// 67% RF gegen Leichte Jäger
-		
-		if(ZielType == T_RAK)
-			return rand() % 100 >= 10;	// 90% RF gegen Raks
-
-		return false;
-	}
-
-	if(AttType == T_ZER)
-	{
-		if(ZielType == T_LL)
-			return rand() % 100 >= 10;	// 90% RF gegen Leichte Laser
-
-		return false;
-	}
-
-	if(AttType == T_BOMBER)
-	{
-		if(ZielType == T_LL || ZielType == T_RAK)
-			return rand() % 100 >= 10;	// 90% Rf gegen Raketenwerfer und Leichte Laser
-		if(ZielType == T_SL || ZielType == T_IONEN)
-			return rand() % 100 >= 20;	// 90% Rf gegen Ionengeschütze und Schwere Laser
-
-		return false;
-	}
-
-	return false;
-}
-
-bool CSpeedKernel::CantShootAgain(ITEM_TYPE AttType, ITEM_TYPE ZielType) {
-    return false;
-}
-
-bool CSpeedKernel::CanShootAgain_User(ITEM_TYPE AttType, ITEM_TYPE ZielType) {
-    CSpeedKernel &inst = CSpeedKernel::GetInstance();
-    return inst.RandomNumber(10000) < inst.m_RF[AttType][ZielType];
-}
-
-// newest values
-bool CSpeedKernel::CanShootAgain_V065(ITEM_TYPE AttType, ITEM_TYPE ZielType)
-{
-    if(AttType == T_TS)
-	{
-        // CHECK!
-        if(ZielType == T_SPIO || ZielType == T_SAT)
-            return CSpeedKernel::GetInstance().RandomNumber(10000) >= 8; // RF(1250)
-        if(ZielType == T_RAK || ZielType == T_LL || ZielType == T_LJ)
-            return CSpeedKernel::GetInstance().RandomNumber(1000) >= 5; //RF (200)
-        if(ZielType == T_SS)
-            return CSpeedKernel::GetInstance().RandomNumber(10000) >= 333;  // RF(30)
-		if(ZielType == T_TS || ZielType == T_PLASMA || ZielType == T_KS || ZielType == T_GS)
-			return false;        
-        if(ZielType == T_SL || ZielType == T_IONEN || ZielType == T_SJ)
-            return rand() % 100 >= 1;       // RF(100)
-        if(ZielType == T_GAUSS)
-            return rand() % 100 >= 2;       // RF(50)
-        if(ZielType == T_KREUZER)
-            return CSpeedKernel::GetInstance().RandomNumber(10000) >= 303;  // RF(33)        
-        if(ZielType == T_BOMBER)
-            return rand() % 100 >= 4;       // RF(25)
-        if(ZielType == T_ZER)
-            return rand() % 100 >= 20;      // RF(5)
-        // other ships
-        return CSpeedKernel::GetInstance().RandomNumber(1000) >= 4;         // RF(250)
-	}
-    if((ZielType == T_SPIO || ZielType == T_SAT) && AttType != T_SPIO && AttType < T_SHIPEND)
-		return rand() % 100 >= 20;		    // RF(5)
-
-	if(AttType == T_KREUZER)
-	{
-		if(ZielType == T_LJ)
-			return rand() % 100 >= 33;	    // RF(3)
-		
-		if(ZielType == T_RAK)
-			return rand() % 100 >= 10;	    // RF(10)
-
-		return false;
-	}
-
-	if(AttType == T_ZER)
-	{
-		if(ZielType == T_LL)
-			return rand() % 100 >= 10;	    // RF(10)
-
-		return false;
-	}
-
-	if(AttType == T_BOMBER)
-	{
-		if(ZielType == T_LL || ZielType == T_RAK)
-			return rand() % 100 >= 5;	    // RF(20)
-		if(ZielType == T_SL || ZielType == T_IONEN)
-			return rand() % 100 >= 10;	    // RF(10)
-
-		return false;
-	}
-
-	return false;
-}
-
 bool CSpeedKernel::CanShootAgain_FromTable(ITEM_TYPE AttType, ITEM_TYPE TargetType)
 {
-    CSpeedKernel& inst = CSpeedKernel::GetInstance();
-    return inst.RandomNumber(10000) >= inst.m_RF[AttType][TargetType];
+    return RandomNumber(10000) >= m_RF[AttType][TargetType];
 }
 
 // computes new best/worst case

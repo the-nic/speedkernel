@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2008 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -238,11 +238,13 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
     sit.OwnerID = 0;
     int num = 0;
     int i;
-    bool found_ship[T_END];
-    for(i = 0; i < T_END; i++)
+    bool found_ship[T_END+1];
+    for(i = 0; i < T_END+1; i++)
     {
         ITEM_TYPE type = m_ParseOrder[0][i];
         item = ItemName(type);
+        if(!item.length())
+            continue;
         /*item2 = ItemName2((ITEM_TYPE)i);*/
         sit.Num = 0;
         if((f2 = s.find(item.c_str(), 0)) != genstring::npos)
@@ -265,13 +267,15 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
         else
             found_ship[type] = false;
     }
-    for(i = 0; i < T_END; i++)
+    for(i = 0; i < T_END+1; i++)
     {
         ITEM_TYPE type = m_ParseOrder[1][i];
         if(found_ship[type])
             continue;
 
         item = ItemName2(type);
+        if(!item.length())
+            continue;
         sit.Num = 0;
         if((f2 = s.find(item.c_str(), 0)) != genstring::npos)
         {
@@ -301,6 +305,8 @@ bool CSpeedKernel::ParseSpioLine(genstring& s, TargetInfo& ti)
                 founditem = true;
         }
     }
+    if(num)
+        founditem = true;
 
     if(founditem || num > 0) {
         ti.Techs.Weapon = techs[0];
@@ -641,7 +647,7 @@ bool CSpeedKernel::ReadCRTable(genstring Table, vector<SItem> &Fleet, ShipTechs&
             Table.erase(i, 1);
     }
 
-    int n = 0;
+    size_t n = 0;
     // get number of units of different types
     while(f < f2 && f < Table.length())
     {

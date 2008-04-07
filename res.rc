@@ -28,8 +28,8 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,9,7,0
- PRODUCTVERSION 0,9,7,0
+ FILEVERSION 0,9,8,1
+ PRODUCTVERSION 0,9,8,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -47,14 +47,14 @@ BEGIN
             VALUE "Comments", "Licensed under the terms and conditions of the GNU GPL\0"
             VALUE "CompanyName", "SpeedSim Developers\0"
             VALUE "FileDescription", "SpeedSim - The OGame Combat Simulator\0"
-            VALUE "FileVersion", "0, 9, 7, 0\0"
+            VALUE "FileVersion", "0, 9, 8, 1\0"
             VALUE "InternalName", "SpeedKernel\0"
-            VALUE "LegalCopyright", "Copyright © 2004-2007 Nicolas Höft & Maximilian Matthé\0"
+            VALUE "LegalCopyright", "Copyright © 2004-2008 Nicolas Höft & Maximilian Matthé\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "SpeedKernel.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "SpeedKernel\0"
-            VALUE "ProductVersion", "0, 9, 7, 0\0"
+            VALUE "ProductVersion", "0, 9, 8, 1\0"
             VALUE "SpecialBuild", "\0"
         END
     END

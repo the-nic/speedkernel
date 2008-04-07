@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2008 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -81,7 +81,7 @@ void CSpeedKernel::GetSpeed(int &perc_speed, int &v, int &i, int &h, int FleetID
 
 void CSpeedKernel::SetRF(RFTYPE ver)
 {
-    switch(ver) {
+    /*switch(ver) {
     case RF_058:
         CanShootAgain = CanShootAgain_V058;
     	break;
@@ -105,8 +105,9 @@ void CSpeedKernel::SetRF(RFTYPE ver)
         CanShootAgain = CanShootAgain_V065;
         break;
     }
-    CanShootAgain = CanShootAgain_FromTable;
-    FillRFTable(ver);
+    CanShootAgain = CanShootAgain_FromTable;*/
+    if(ver != RF_USER)
+        FillRFTable(ver);
 }
 
 void CSpeedKernel::SetTargetInfo(TargetInfo TI, int FleetID, bool ResetWavesState /* = true*/)
@@ -166,7 +167,7 @@ TargetInfo CSpeedKernel::GetTargetInfo(int FleetID)
     return m_DefenderInfos[FleetID];
 }
 
-void CSpeedKernel::SetCSSFiles(TCHAR* cr_css, TCHAR* bwc_css)
+void CSpeedKernel::SetCSSFiles(const TCHAR* cr_css, const TCHAR* bwc_css)
 {
     if(cr_css)
         m_CR_CSS = cr_css;
@@ -181,4 +182,14 @@ void CSpeedKernel::SetCSSFiles(TCHAR* cr_css, TCHAR* bwc_css)
 void CSpeedKernel::UseOldBattleShip(bool use)
 {
     m_UseOldBS = use;
+}
+
+void CSpeedKernel::SetPercLossesToDF(int perc)
+{
+    m_LossesToDF = perc;
+}
+
+int CSpeedKernel::GetPercLossesToDF()
+{
+    return m_LossesToDF;
 }

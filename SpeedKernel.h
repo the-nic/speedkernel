@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2008 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -43,23 +43,16 @@ using namespace std;
 
 //! The SpeedKernel Class which contains all simulating/reading functions
 /*!
-    Because CSpeedKernel is a singleton class, create an object that way:
-    \code
-      CSpeedKernel& kernel = CSpeedKernel.GetInstance();
-    \endcode
     \author Nicolas Höft
     \author Maximilian Matthé
-    \date 2004-2007
+    \date 2004-2008
 */
 
 class SPEEDKERNEL_API CSpeedKernel
 {
 public:
-    //! Function to get the current instance
-    static CSpeedKernel& GetInstance();
-    //! Force new Instance - breaks sigleton class but needed for
-    CSpeedKernel& ForceNewInstance();
 
+    CSpeedKernel();
     ~CSpeedKernel();
 
     //! Simulate starts a simulation
@@ -239,6 +232,11 @@ public:
     */
 	void SetCallBack(void (*f)(int sim, int round));
 
+    //! Sets amount of losses going into debris (default = 30)
+    void SetPercLossesToDF(int perc);
+    //! Gets amount of losses going into debris (default = 30)
+    int GetPercLossesToDF();
+
     //! Enables/Disables the old battleship - works only, if no ship data is loaded
     void UseOldBattleShip(bool use);
 
@@ -302,7 +300,7 @@ public:
     /*
         Use NULL as param, to reset to default values
     */
-    void SetCSSFiles(TCHAR* cr_css, TCHAR* bwc_css);
+    void SetCSSFiles(const TCHAR* cr_css, const TCHAR* bwc_css);
     //@}
     
     //! Generates the BWC html into file
@@ -406,12 +404,6 @@ public:
 #endif
 
 private:
-	CSpeedKernel();
-    // copy constructor
-	CSpeedKernel(CSpeedKernel& s);
-    CSpeedKernel(CSpeedKernel* s);
-    CSpeedKernel& operator=(CSpeedKernel& s){ return *((CSpeedKernel*)NULL); };
-
     bool InitSim();
     void ComputeShipData();
     void MaxAllShields();
@@ -456,19 +448,7 @@ private:
     Obj FillObj(ITEM_TYPE Type, int Team, DWORD PlayerID);
     static bool ItemCompare(const SItem& a, const SItem& b);
 
-	//bool CanShootAgain(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-	// becomes function pointer
-    bool (*CanShootAgain)(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-	static bool CanShootAgain_V059(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-	static bool CanShootAgain_V058(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-    static bool CanShootAgain_V062(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-    static bool CanShootAgain_V065(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-    static bool CanShootAgain_FromTable(ITEM_TYPE AttType, ITEM_TYPE TargetType);
-    // own RF
-    static bool CanShootAgain_User(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-    // deactivated RF
-    static bool CantShootAgain(ITEM_TYPE AttType, ITEM_TYPE ZielType);
-
+    bool CanShootAgain_FromTable(ITEM_TYPE AttType, ITEM_TYPE TargetType);
     void FillRFTable(RFTYPE rfType);
     
     void SetParseOrder();
@@ -522,6 +502,7 @@ private:
     bool m_BracketNames;
     bool m_UseOldBS;
 
+    int m_LossesToDF;
     float m_DefRebuildFac;
     bool m_ShipDataFromFile;
 
@@ -595,7 +576,7 @@ private:
     int m_Speed[MAX_PLAYERS_PER_TEAM];
 
     // RF-values read from file
-    int m_RF[T_END][T_END];
+    unsigned long m_RF[T_END][T_END];
 
     // names of ships in ini-files
     genstring m_IniFleetNames[T_END];

@@ -1,6 +1,6 @@
 /*
 SpeedSim - a OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2008 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -100,7 +100,7 @@ bool CSpeedKernel::ItemCompare(const SItem& a, const SItem& b)
 // copies name of unit into TCHAR-pointer
 void CSpeedKernel::ItemName(ITEM_TYPE t, TCHAR* out)
 {
-    if(t >= T_KT && t <= T_GS)
+    if(t >= T_KT && t <= T_END)
         _tcscpy(out, m_FleetNames[t].c_str());
     else
         _tcscpy(out, m_FleetNames[T_END + 1].c_str());//"Unknown"
@@ -677,7 +677,7 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
         m_wrongRess2[1] = _T("Kristallspeicher");
         m_wrongRess2[2] = _T("Deuteriumtank");
         m_Spiostrings[0] = _T("auf ");
-        m_Spiostrings[1] = _T("] am ");
+        m_Spiostrings[1] = _T("] (");
         m_Spiostrings[3] = _T("Mondbasis");
         m_EspLimiter = _T("Spionageabwehr:");
         m_EspTitles[0] = _T("Flotten");
@@ -949,7 +949,7 @@ bool CSpeedKernel::LoadRFFile(char *RFFile) {
         for(j = 0; j < T_END; j++) {
             long n;
             if(iniFile.GetLong(n, m_IniFleetNames[i], m_IniFleetNames[j]))
-                m_RF[i][j] = RFPERC(n);
+                m_RF[i][j] = 9999 - RFPERC(n);
         }
     }
     for(i = 0; i < T_END; i++) {
@@ -1079,6 +1079,7 @@ void CSpeedKernel::FillRFTable(RFTYPE rfType)
             m_RF[T_SPIO][T_SPIO] = 10000;
             m_RF[T_SPIO][T_SAT] = 10000;
             m_RF[T_SAT][T_SAT] = 10000;
+            m_RF[T_SAT][T_SPIO] = 10000;
 
             m_RF[T_SJ][T_KT] = 3333;
 
@@ -1128,7 +1129,7 @@ void CSpeedKernel::SetParseOrder()
     int i = 0;
 
     // get all lengths of ship names
-    for(; i < T_END; i++)
+    for(; i < T_END+1; i++)
     {
         ShipString s;
         s.Item = (ITEM_TYPE)i;
@@ -1140,9 +1141,9 @@ void CSpeedKernel::SetParseOrder()
     // sort them descending
     sort(tmp_list[0].begin(), tmp_list[0].end(), ShipString::IsLess);
     sort(tmp_list[1].begin(), tmp_list[1].end(), ShipString::IsLess);
-    m_ParseOrder[0].resize(T_END);
-    m_ParseOrder[1].resize(T_END);
-    for(i = 0; i < T_END; i++)
+    m_ParseOrder[0].resize(T_END+1);
+    m_ParseOrder[1].resize(T_END+1);
+    for(i = 0; i < T_END+1; i++)
     {
         m_ParseOrder[0][i] = tmp_list[0][i].Item;
         m_ParseOrder[1][i] = tmp_list[1][i].Item;

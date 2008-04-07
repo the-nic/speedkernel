@@ -71,7 +71,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libpng.lib zlib.lib freetype220.lib"
 				OutputFile=".\..\bin\Unicode/SpeedKernel.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -164,7 +163,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libpng.lib zlib.lib freetype220.lib"
 				OutputFile=".\..\bin/SpeedKernel.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -259,7 +257,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libpng.lib zlib.lib freetype220.lib"
 				OutputFile=".\..\bin\Debug/SpeedKernel.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -355,7 +352,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libpng.lib zlib.lib freetype220.lib"
 				OutputFile=".\..\bin\Unicode\Debug/SpeedKernel.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -465,6 +461,7 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -474,6 +471,7 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug Unicode|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -505,6 +503,7 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -514,6 +513,7 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug Unicode|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -555,6 +555,7 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug Unicode|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -841,14 +842,14 @@
 			<File
 				RelativePath="pnggraph.h"
 				>
-			</File>
-			<File
-				RelativePath="pngwriter.h"
-				>
-			</File>
-			<File
-				RelativePath="ProfileClass.h"
-				>
+				<FileConfiguration
+					Name="Release Unicode|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
@@ -859,6 +860,86 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Unicode|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="pngwriter.h"
+				>
+				<FileConfiguration
+					Name="Release Unicode|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Unicode|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="ProfileClass.h"
+				>
+				<FileConfiguration
+					Name="Release Unicode|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Unicode|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool

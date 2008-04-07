@@ -1,6 +1,6 @@
 /*
 SpeedSim - an OGame (www.ogame.org) combat simulator
-Copyright (C) 2004-2007 Maximialian Matthé & Nicolas Höft
+Copyright (C) 2004-2008 Maximialian Matthé & Nicolas Höft
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFFER 1
 
 // version of kernel
-#define KERNEL_VERSION _T("0.9.7.0b")
+#define KERNEL_VERSION _T("0.9.8.1b")
 
 //! default defense rebuild factor
 #define DEF_AUFBAU_FAKTOR 0.80f
