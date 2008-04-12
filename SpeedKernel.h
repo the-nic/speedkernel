@@ -170,12 +170,14 @@ public:
         \param[in] perc_speed Velocity of the fleet (100% = 100)
     */
     void SetSpeed(int perc_speed, int v, int i, int h, int FleetID);
+    void SetSpeed(int perc_speed, int rec_speed, int v, int i, int h, int FleetID);
 
     //! Gets the speed of a certain fleet
     /*!
         \sa SetSpeed()
     */
     void GetSpeed(int &perc_speed, int &v, int &i, int &h, int FleetID);
+    void GetSpeed(int &perc_speed, int &rec_speed, int &v, int &i, int &h, int FleetID);
     //@}
 
     //! Rebuilds defense, removes the robbered resources
@@ -574,6 +576,7 @@ private:
 
     // fleet speed (100% = 10)
     int m_Speed[MAX_PLAYERS_PER_TEAM];
+    int m_RecSpeed[MAX_PLAYERS_PER_TEAM];
 
     // RF-values read from file
     unsigned long m_RF[T_END][T_END];
