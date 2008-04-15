@@ -973,40 +973,8 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath="res.rc"
+				RelativePath=".\SpeedKernel.rc"
 				>
-				<FileConfiguration
-					Name="Release Unicode|Win32"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Unicode|Win32"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>
