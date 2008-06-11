@@ -936,28 +936,32 @@ bool CSpeedKernel::LoadLangFile(const char *langfile) {
     return true;
 }
 
-bool CSpeedKernel::LoadRFFile(char *RFFile) {
+bool CSpeedKernel::LoadRFFile(char *RFFile)
+{
     genstring s;
     int i, j;
     CIniFile iniFile(RFFile);
 
-    for(i = 0; i < T_END; i++) {
+    for(i = 0; i < T_END; i++)
+    {
         for(j = 0; j < T_END; j++)
-            m_RF[i][j] = 0;
+            m_RF[i][j] = 10000;
     }
-    for(i = 0; i < T_END; i++) {
-        for(j = 0; j < T_END; j++) {
+    for(i = 0; i < T_END; i++)
+    {
+        for(j = 0; j < T_END; j++)
+        {
             long n;
             if(iniFile.GetLong(n, m_IniFleetNames[i], m_IniFleetNames[j]))
                 m_RF[i][j] = 9999 - RFPERC(n);
         }
     }
-    for(i = 0; i < T_END; i++) {
-        for(j = 0; j < T_END; j++) {
-            if(m_RF[i][j] > 10000)
-                m_RF[i][j] = 9999;
-            else if(m_RF[i][j] < 0)
-                m_RF[i][j] = 0;
+    for(i = 0; i < T_END; i++)
+    {
+        for(j = 0; j < T_END; j++)
+        {
+            if(m_RF[i][j] > 10000 || m_RF[i][j] <= 0)
+                m_RF[i][j] = 10000;
         }
     }
 
