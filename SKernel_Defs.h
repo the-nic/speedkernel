@@ -45,7 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
     \brief If defined, own assembler random number generator is used
     \warning Use only, when you use Windows with Visual C++, or else you can't compile 
 */
-#define ASMRAND
+//#define ASMRAND
 #endif
 
 /*!
