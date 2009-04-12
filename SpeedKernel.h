@@ -431,8 +431,11 @@ private:
     void GenerateCRTable(genstrstream &out, const vector<SItem> &Items, int Team, int Player, TCHAR* Title);
 
     int GetDistance(const PlaniPos& b, const PlaniPos& e);
+    DWORD ComputeFlyTime(const PlaniPos& b, const PlaniPos& e, const vector<SItem>& vFleet, int Speed, int EngineTechs[]);
     DWORD ComputeFlyTime(const PlaniPos& b, const PlaniPos& e, int FleetID, const vector<SItem>& vFleet);
     int GetShipSpeed(ITEM_TYPE Ship, int FleetID);
+    int GetShipSpeed(const ITEM_TYPE Ship, const int EngineTechs[]);
+    int GetFleetSpeed(const vector<SItem>& vFleet, const int EngineTechs[]);
     int GetFleetSpeed(int FleetID, const vector<SItem>& vFleet);
 
     //genstring ReadStringFromIniFile(char *inifile, const TCHAR *Section, const TCHAR *KeyName);
@@ -569,7 +572,7 @@ private:
 
     // fleet speed (100% = 10)
     int m_Speed[MAX_PLAYERS_PER_TEAM];
-    int m_RecSpeed[MAX_PLAYERS_PER_TEAM];
+    int m_RecSpeed;
 
     // RF-values read from file
     unsigned long m_RF[T_END][T_END];

@@ -39,8 +39,8 @@ CSpeedKernel::CSpeedKernel()
     for(r = 0; r < MAX_PLAYERS_PER_TEAM; r++)
     {
         m_Speed[r] = 10;
-        m_RecSpeed[r] = 10;
     }
+    m_RecSpeed = 10;
 
 	m_NumShipsAtt.resize(T_END);
 	m_NumShipsDef.resize(T_END);
@@ -166,8 +166,8 @@ void CSpeedKernel::Reset()
     for(int r = 0; r < MAX_PLAYERS_PER_TEAM; r++)
     {
         m_Speed[r] = 10;
-        m_RecSpeed[r] = 10;
     }
+    m_RecSpeed = 10;
     memset(m_OwnPos, 0, MAX_PLAYERS_PER_TEAM * sizeof(PlaniPos));
 	memset(m_TechsAtt, 0, MAX_PLAYERS_PER_TEAM * sizeof(ShipTechs));
 	memset(m_TechsDef, 0, MAX_PLAYERS_PER_TEAM * sizeof(ShipTechs));

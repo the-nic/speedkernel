@@ -70,7 +70,7 @@ void CSpeedKernel::SetSpeed(int perc_speed, int v, int i, int h, int FleetID) {
 
 void CSpeedKernel::SetSpeed(int perc_speed, int rec_speed, int v, int i, int h, int FleetID) {
     SetSpeed(perc_speed, v, i, h, FleetID);
-    m_RecSpeed[FleetID] = rec_speed;
+    m_RecSpeed = rec_speed / 10;
 }
 
 void CSpeedKernel::GetSpeed(int &perc_speed, int &v, int &i, int &h, int FleetID) {
@@ -82,7 +82,7 @@ void CSpeedKernel::GetSpeed(int &perc_speed, int &v, int &i, int &h, int FleetID
 
 void CSpeedKernel::GetSpeed(int &perc_speed, int &rec_speed, int &v, int &i, int &h, int FleetID) {
     GetSpeed(perc_speed, v, i, h, FleetID);
-    rec_speed = m_RecSpeed[FleetID];
+    rec_speed = m_RecSpeed * 10;
 }
 
 void CSpeedKernel::SetRF(RFTYPE ver)

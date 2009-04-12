@@ -431,6 +431,20 @@ int CSpeedKernel::GetDistance(const PlaniPos& b, const PlaniPos& e)
 	return 0;
 }
 
+DWORD CSpeedKernel::ComputeFlyTime(const PlaniPos& b, const PlaniPos& e, const vector<SItem>& vFleet, int Speed, int EngineTechs[])
+{
+    if(!Speed || !EngineTechs)
+        return 0;
+    if(b.Gala != e.Gala)
+        return 10 + (3500.0f / Speed * sqrt((abs((int)(b.Gala-e.Gala)) * 20000000.0f) / GetFleetSpeed(vFleet, EngineTechs)));
+
+    if(b.Sys != e.Sys)
+        return 10 + (3500.0f / Speed * sqrt((2700000.0f + abs((int)(b.Sys-e.Sys)) * 95000.0f) / GetFleetSpeed(vFleet, EngineTechs)));
+
+    if(b.Pos != e.Pos)
+        return 10 + (3500.0f / Speed * sqrt((1000000.0f + abs((int)(b.Pos-e.Pos)) * 5000.0f) / GetFleetSpeed(vFleet, EngineTechs)));
+}
+
 DWORD CSpeedKernel::ComputeFlyTime(const PlaniPos& b, const PlaniPos& e, int FleetID, const vector<SItem>& vFleet /* = m_NumSetShipsAtt */)
 {
     if(!m_Speed[FleetID])
@@ -446,32 +460,50 @@ DWORD CSpeedKernel::ComputeFlyTime(const PlaniPos& b, const PlaniPos& e, int Fle
     return 0;
 }
 
-int CSpeedKernel::GetShipSpeed(ITEM_TYPE Ship, int FleetID)
+int CSpeedKernel::GetShipSpeed(const ITEM_TYPE Ship, const int EngineTechs[])
 {
     int basesp = BaseSpeed[Ship];
     int engine = Triebwerke[Ship];
-    if(Ship == T_KT && m_TechsTW[FleetID][engine + 1] >= 5) {
-        basesp *= 2;
-        engine += 1;
+    if(Ship == T_KT)
+    {
+        if(EngineTechs[engine + 1] >= 5)
+        {
+            basesp *= 2;
+            engine += 1;
+        }
     }
-    if(Ship == T_BOMBER && m_TechsTW[FleetID][engine + 1] >= 8) {
-        basesp = 5000;
-        engine += 1;
+    else if(Ship == T_BOMBER)
+    {   
+        if(EngineTechs[engine + 1] >= 8)
+        {
+            basesp = 5000;
+            engine += 1;
+        }
     }
-    return basesp * (1 + (float)m_TechsTW[FleetID][engine] * (engine + 1) / 10.0f);
+    return basesp * (1 + (float)EngineTechs[engine] * (engine + 1) / 10.0f);
 }
 
-int CSpeedKernel::GetFleetSpeed(int FleetID, const vector<SItem>& vFleet)
+int CSpeedKernel::GetShipSpeed(ITEM_TYPE Ship, int FleetID)
+{
+    return GetShipSpeed(Ship, m_TechsTW[FleetID]);
+}
+
+int CSpeedKernel::GetFleetSpeed(const vector<SItem>& vFleet, const int EngineTechs[])
 {
     int min = INT_MAX;
     for(size_t i = 0; i < vFleet.size(); i++) {
-        if(vFleet[i].Num == 0 || vFleet[i].Type == T_NONE || vFleet[i].OwnerID != FleetID)
+        if(vFleet[i].Num == 0 || vFleet[i].Type == T_NONE)
             continue;
-        int speed = GetShipSpeed(vFleet[i].Type, FleetID);
+        int speed = GetShipSpeed(vFleet[i].Type, EngineTechs);
         if(speed < min)
             min = speed;
     }
     return min;
+}
+
+int CSpeedKernel::GetFleetSpeed(int FleetID, const vector<SItem>& vFleet)
+{
+    return GetFleetSpeed(vFleet, m_TechsTW[FleetID]);
 }
 
 void CSpeedKernel::SetRemainingItemsInDef(REBUILD_OPTION opt)

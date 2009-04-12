@@ -672,7 +672,7 @@ void CSpeedKernel::ComputeBattleResult()
             // fly time for recyclers
             vector<SItem> vRec;
             vRec.push_back(SItem(T_REC, 1, pl));
-            m_Result.RecFlyTime[pl] = ComputeFlyTime(m_OwnPos[pl], m_Result.Position, pl, vRec);
+            m_Result.RecFlyTime[pl] = ComputeFlyTime(m_OwnPos[pl], m_Result.Position, vRec, m_RecSpeed, m_TechsTW[pl]);
             // fuel for recyclers
             float rec_bsp = BaseSpeed[T_REC] * (1 + (float)m_TechsTW[pl][Triebwerke[T_REC]] * (Triebwerke[T_REC] + 1) / 10.0f);
             float rec_sp = 35000.f / (m_Result.RecFlyTime[pl] - 10) * sqrt(dist * 10 / rec_bsp);
