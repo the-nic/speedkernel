@@ -295,9 +295,6 @@ bool CSpeedKernel::Simulate(int count)
                 break;
             }
 
-			if(m_FuncPtr)
-				m_FuncPtr(num + 1, round);
-
 			// Save number of ships for combat report
 			SaveShipsToCR(round);
 

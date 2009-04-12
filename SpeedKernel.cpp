@@ -31,7 +31,6 @@ CSpeedKernel::CSpeedKernel()
 	memset(m_TechsDef, 0, MAX_PLAYERS_PER_TEAM * 3 * sizeof(int));
 	memset(&m_Result, 0, sizeof(BattleResult));
 	m_Result.RessDa = Res();
-	m_FuncPtr = NULL;
 	m_CompBestWorstCase = true;
 	m_Result.GesamtBeute = Res();
 	m_Result.NumAtts = 0;
@@ -164,7 +163,6 @@ void CSpeedKernel::Reset()
 	m_AttObj->clear();
 	m_DefObj->clear();
 	m_DefInTF = false;
-    m_FuncPtr = NULL;
     for(int r = 0; r < MAX_PLAYERS_PER_TEAM; r++)
     {
         m_Speed[r] = 10;

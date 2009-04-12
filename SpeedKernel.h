@@ -229,11 +229,6 @@ public:
     //! \name Kernel Options
     //! Functions for setting/getting some options for the kernel
     //@{
-    //! Sets the callback function which is called after every round that you can update your output
-    /*!
-        \param[in,out] f Is a function pointer to the function which is called after every round. If set to NULL, the callback wont be called
-    */
-	void SetCallBack(void (*f)(int sim, int round));
 
     //! Sets amount of losses going into debris (default = 30)
     void SetPercLossesToDF(int perc);
@@ -455,9 +450,6 @@ private:
     void FillRFTable(RFTYPE rfType);
     
     void SetParseOrder();
-
-	// pointer to function which outputs number of rounds and simulations
-    void (*m_FuncPtr)(int sim, int round);
 
 	vector<SItem> m_NumShipsAtt;
 	vector<SItem> m_NumShipsDef;

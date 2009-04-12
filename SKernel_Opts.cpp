@@ -43,10 +43,6 @@ void CSpeedKernel::ResetWaveState()
     SetTargetInfo(m_LastReadTarget, 0, true);
 }
 
-void CSpeedKernel::SetCallBack(void (*f)(int sim, int round)) {
-    m_FuncPtr = f;
-}
-
 void CSpeedKernel::SetDefInDebris(bool really) {
     m_DefInTF = really;
 }
