@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #if !defined(_DEBUG) && defined(_MSC_VER)
 /*! \def ASMRAND
     \brief If defined, own assembler random number generator is used
-    \warning Use only, when you use Windows with Visual C++, or else you can't compile 
+    \warning Use only, when you use Windows with Visual C++, or else you can't compile
 */
 //#define ASMRAND
 #endif
@@ -51,7 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*!
     \def INCL_OPTIMIZED_FUNCTIONS
     \brief If defined, optimized functions will be included
-    
+
     This is not needed at the moment so just let it undefined
 */
 //#define INCL_OPTIMIZED_FUNCTIONS
@@ -60,7 +60,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
     \def CREATE_ADV_STATS
     \brief Define this that the more accurate statistics (in png format) will be created
 
-    You can see these stats in the BestWorst-Case File. To be able to use this you will need 
+    You can see these stats in the BestWorst-Case File. To be able to use this you will need
     the freetype library, pnglib and zlib.
 */
 //#define CREATE_ADV_STATS
@@ -99,8 +99,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*!
     \def UNICODE
     \brief Define this, to compile as Unicode version
-*/ 
-//#define UNICODE 
+*/
+#define UNICODE
 
 // remove old defines
 #undef _T
