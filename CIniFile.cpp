@@ -155,15 +155,17 @@ genstr CIniFile::GetNextLine(FILE* file)
             return _T("");
     }
     // delete CR and LF
-    size_t l = _tcslen(str) - 1;
+    size_t l = _tcslen(str);
+    if(l < 2)
+        return _T("");
     if(str[0] == '\n' || str[0] == '\r')
         return _T("");
 
-    if(str[l] == '\n' || str[l] == '\r')
-        str[l] = '\0';
-
     if(str[l-1] == '\n' || str[l-1] == '\r')
         str[l-1] = '\0';
+
+    if(str[l-2] == '\n' || str[l-2] == '\r')
+        str[l-2] = '\0';
 
     return genstr(str);
 }
@@ -282,7 +284,7 @@ void CIniFile::SetStr(genstr val, genstr strSection, genstr strKey, bool overwri
 void CIniFile::SetLong(long val, genstr strSection, genstr strKey, bool overwrite_existing /*= true*/)
 {
     char longStr[64];
-    sprintf(longStr, "%d", val);
+    snprintf(longStr, 64, "%ld", val);
 
     TCHAR str[64];
     // convert into unicode
@@ -388,6 +390,8 @@ string CIniFile::WStringToUTF8(wstring str)
 wstring CIniFile::UTF8ToWString(string str)
 {
     wstring wstr;
+    if(!utf8::is_valid(str.begin(), str.end()))
+        return wstr;
     vector<wchar_t> wchars;
     if(sizeof(wchar_t) == 2)
         utf8::utf8to16(str.begin(), str.end(), back_inserter(wchars));
